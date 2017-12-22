@@ -50,18 +50,18 @@ The steps to make the bridge app work are:
 
 * Layout: 
  
-![alt text](./images/App Layout.png)
+  ![alt text](./images/appLayout.png)
 
 * RC indicator:
 
-  * ![alt text](./images/RC red.png) No USB device connected to BridgeApp
-  * ![alt text](./images/RC purple.png) Connected device is not supported or not working properly
-  * ![alt text](./images/RC green.png) DJI RC is connected
+  * ![alt text](./images/rcRed.png) No USB device connected to BridgeApp
+  * ![alt text](./images/rc_purple.png) Connected device is not supported or not working properly
+  * ![alt text](./images/rcGreen.png) DJI RC is connected
 
 
 * Connection indicator
-  * ![alt text](./images/Signal red.png) No SDK Application is connected to Bridge
-  * ![alt text](./images/Signal green.png) There is at least one SDK Application connected to BridgeApp  
+  * ![alt text](./images/signalRed.png) No SDK Application is connected to Bridge
+  * ![alt text](./images/signalGreen.png) There is at least one SDK Application connected to BridgeApp  
 
 * Host IP Address: This is the address of the BridgeApp. To connect to it, pass in the displayed ip value to `enableBridgeModeWithBridgeAppIP` method in `SDKManager`. 
 
