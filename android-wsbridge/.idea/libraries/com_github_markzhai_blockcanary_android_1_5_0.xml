@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="com.github.markzhai:blockcanary-android-1.5.0">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/blockcanary-android-1.5.0.aar/cc2b028924fe0b328701827767ea9e0a/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/blockcanary-android-1.5.0.aar/cc2b028924fe0b328701827767ea9e0a/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.markzhai/blockcanary-android/1.5.0/ac76e24a8e80b851af595676be14666af6ce336b/blockcanary-android-1.5.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -17,7 +17,8 @@ This makes it easier develop, debug, setup CI environments, share devices in a t
 
 ## Compatibility
 
-The Bridge App is compatible with the Android DJI Mobile SDK v4.0 and above.
+* The Bridge App is compatible with the Android DJI Mobile SDK v4.0 and above.
+* The Bridge App is compatible with all DJI RC
 
 ## Setup
 
@@ -42,8 +43,22 @@ The steps to make the bridge app work are:
   * Make sure the red light in the top left corner of Device 2's screen turns green - this shows Device 2 is connected with Device 1.
   * The application can now be run remotely.
 
+## App features
+
+* Layout: 
+![alt text](./images/App Layout.png "App Layout")
+* RC indicator:
+  * ![alt text](./images/RC red.png "App Layout") No USB device connected to BridgeApp
+  * ![alt text](./images/RC purple.png "App Layout") Connected device is not supported or not working properly
+  * ![alt text](./images/RC green.png "App Layout") DJI RC is connected
+* Connection indicator
+  * ![alt text](./images/Signal red.png "App Layout") No SDK Application is connected to Bridge
+  * ![alt text](./images/Signal green.png "App Layout") There is at least one SDK Application connected to BridgeApp  
+* Host IP Address: this is the address of the BridgeApp. To connect to it, pass in the displayed ip value to `enableBridgeModeWithBridgeAppIP` method in `SDKManager`. 
+* App Version: displays the current version of the BridgeApp. This is not the version of the DJI SDK.
+* Functionalities:
+  * BridgeApp supports conntection via Wifi or Eithernet ( using USB Adapter and CrystalSky)
+  * BirdgeApp acceptes multiple simultinous connections. This is helpful to share one Aircraft with many developers.
+
 ## Notes
 This is a beta version of the Bridge App. Please provide feedback in areas you think it could be improved or is unstable.
-
-
-
