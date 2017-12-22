@@ -76,7 +76,7 @@ The steps to make the bridge app work are:
 
 This is a beta version of the Bridge App. Please provide feedback in areas you think it could be improved or is unstable.
 
-Please use **Github Issue** or **email** [hai.vo@dji.com](hai.vo@dji.com) when you meet any problems of using this demo. At a minimum please let us know:
+Please use **Github Issue** or **email** [hai.vo@dji.com](hai.vo@dji.com) when you meet any problems of using this project. At a minimum please let us know:
 
 * Which DJI Product you are using?
 * Which Android Device and Android System version you are using?
