@@ -1,4 +1,4 @@
-# DJI Android Mobile SDK Bridge App
+# Android-Bridge-App
 
 ## What is this?
 
@@ -32,33 +32,58 @@ Both devices must be able to resolve each other's IP address - and are typically
 The steps to make the bridge app work are:
 
 * Device 1: 
+
   * Start the bridge app
   * Connect the Android device to remote controller
   * Grant USB access to the bridge app
   * Make sure the red light in the top left corner of the screen turns green - this shows the bridge app is connected with the DJI product
   * There will be an IP address in the middle of the screen - which is used with the second device.
+  
 * Device 2:
+
   * Device 2 should be running a DJI Mobile SDK based application.
   * The IP address of Device 1 should be passed to `enableBridgeModeWithBridgeAppIP` in `SDKManager` to connect with Device 1.
   * Make sure the red light in the top left corner of Device 2's screen turns green - this shows Device 2 is connected with Device 1.
   * The application can now be run remotely.
 
-## App features
+## App Features
 
 * Layout: 
-![alt text](./images/App Layout.png "App Layout")
+ 
+![alt text](./images/App Layout.png)
+
 * RC indicator:
-  * ![alt text](./images/RC red.png "App Layout") No USB device connected to BridgeApp
-  * ![alt text](./images/RC purple.png "App Layout") Connected device is not supported or not working properly
-  * ![alt text](./images/RC green.png "App Layout") DJI RC is connected
+
+  * ![alt text](./images/RC red.png) No USB device connected to BridgeApp
+  * ![alt text](./images/RC purple.png) Connected device is not supported or not working properly
+  * ![alt text](./images/RC green.png) DJI RC is connected
+
+
 * Connection indicator
-  * ![alt text](./images/Signal red.png "App Layout") No SDK Application is connected to Bridge
-  * ![alt text](./images/Signal green.png "App Layout") There is at least one SDK Application connected to BridgeApp  
-* Host IP Address: this is the address of the BridgeApp. To connect to it, pass in the displayed ip value to `enableBridgeModeWithBridgeAppIP` method in `SDKManager`. 
-* App Version: displays the current version of the BridgeApp. This is not the version of the DJI SDK.
+  * ![alt text](./images/Signal red.png) No SDK Application is connected to Bridge
+  * ![alt text](./images/Signal green.png) There is at least one SDK Application connected to BridgeApp  
+
+* Host IP Address: This is the address of the BridgeApp. To connect to it, pass in the displayed ip value to `enableBridgeModeWithBridgeAppIP` method in `SDKManager`. 
+
+* App Version: Displays the current version of the BridgeApp. This is not the version of the DJI SDK.
+
 * Functionalities:
+
   * BridgeApp supports conntection via Wifi or Eithernet ( using USB Adapter and CrystalSky)
   * BirdgeApp acceptes multiple simultinous connections. This is helpful to share one Aircraft with many developers.
 
-## Notes
+## Feedback
+
 This is a beta version of the Bridge App. Please provide feedback in areas you think it could be improved or is unstable.
+
+Please use **Github Issue** or **email** [hai.vo@dji.com](hai.vo@dji.com) when you meet any problems of using this demo. At a minimum please let us know:
+
+* Which DJI Product you are using?
+* Which Android Device and Android System version you are using?
+* Which Android Studio version you are using?
+* A short description of your problem includes debugging logs or screenshots.
+* Any bugs or typos you come across.
+
+## License
+
+Android-Bridge-App is available under the MIT license. Please see the LICENSE file for more info.
