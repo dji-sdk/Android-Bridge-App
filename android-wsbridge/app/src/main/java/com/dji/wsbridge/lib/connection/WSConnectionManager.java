@@ -35,7 +35,7 @@ public class WSConnectionManager extends WebSocketServer implements ConnectionMa
     private static final String KEEP_ALIVE = "KeepAlive";
     private static final int DISCONNECT_TIMEOUT = 30000; //Milliseconds
     private static final int KEEP_ALIVE_TIMER_INTERVAL = 1000; //Milliseconds
-    private static final int MAX_BUFFER_SIZE = 100 ;// To avoid OOM crash, ideally we should be more dynamic with this value
+    private static final int MAX_BUFFER_SIZE = 100;// To avoid OOM crash, ideally we should be more dynamic with this value
     private static WSConnectionManager instance;
     public StreamFilter streamFilter = StreamFilter.FILTER_NONE;
     private LinkedBlockingDeque<ByteBuffer> mQueue;
@@ -244,21 +244,29 @@ public class WSConnectionManager extends WebSocketServer implements ConnectionMa
         return mLast;
     }
 
-    public void send(byte[] b) {
+    public synchronized void send(byte[] b) {
         Collection<WebSocket> con = connections();
         if (txStatTracker != null) {
             txStatTracker.increaseByteCount(b.length);
         }
-        final int maxBufferSizePerConnection = MAX_BUFFER_SIZE/con.size();
-        for (WebSocket c : con) {
-            if (c.isOpen()) {
-                if (c instanceof WebSocketImpl && ((WebSocketImpl) c).outQueue.size() > maxBufferSizePerConnection) {
-                    // Do nothing because we don't want to over flow the internal buffer of WebSocket
-                    // This could happen when usb is fast but the connection is slow ( producer/consumer problem)
-                } else {
-                    c.send(b);
+        if (con.size() > 0) {
+            final int maxBufferSizePerConnection = MAX_BUFFER_SIZE / con.size();
+            for (WebSocket c : con) {
+                if (c.isOpen()) {
+                    final boolean isSlowTraffic;
+                    if (c instanceof WebSocketImpl && ((WebSocketImpl) c).outQueue.size() > maxBufferSizePerConnection) {
+                        // Do nothing because we don't want to over flow the internal buffer of WebSocket
+                        // This could happen when usb is fast but the connection is slow ( producer/consumer problem)
+                        isSlowTraffic = true;
+                    } else {
+                        c.send(b);
+                        isSlowTraffic = false;
+                    }
+                    BridgeApplication.getInstance()
+                            .getBus()
+                            .post(new WSTrafficEvent(isSlowTraffic));
+                    //DJIRemoteLogger.d("SOURCE", DJIRemoteLogger.sha1Hash(b) + " -- " + DJIRemoteLogger.bytesToHex(b));
                 }
-                //DJIRemoteLogger.d("SOURCE", DJIRemoteLogger.sha1Hash(b) + " -- " + DJIRemoteLogger.bytesToHex(b));
             }
         }
     }
@@ -296,6 +304,21 @@ public class WSConnectionManager extends WebSocketServer implements ConnectionMa
 
         public int getActiveConnectionCount() {
             return activeConnectionCount;
+        }
+    }
+
+    /**
+     * Event to notify changes in WebSocket Traffic
+     */
+    public static final class WSTrafficEvent {
+        final boolean isSlowConnection;
+
+        public WSTrafficEvent(boolean isSlowConnection) {
+            this.isSlowConnection = isSlowConnection;
+        }
+
+        public boolean isSlowConnection() {
+            return isSlowConnection;
         }
     }
 
