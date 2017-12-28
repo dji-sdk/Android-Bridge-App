@@ -156,13 +156,8 @@ public class BridgeActivity extends Activity {
                     }
                 }
                 if (isWSConnected.get()) {
-                    if (isWSTrafficSlow.get()) {
-                        mWifiIconView.setColorFilter(getResources().getColor(android.R.color.holo_purple),
-                                PorterDuff.Mode.MULTIPLY);
-                    } else {
-                        mWifiIconView.setColorFilter(getResources().getColor(android.R.color.holo_green_light),
-                                PorterDuff.Mode.MULTIPLY);
-                    }
+                    mWifiIconView.setColorFilter(getResources().getColor(android.R.color.holo_green_light),
+                            PorterDuff.Mode.MULTIPLY);
                 } else {
                     mWifiIconView.setColorFilter(getResources().getColor(android.R.color.holo_red_light),
                             PorterDuff.Mode.MULTIPLY);

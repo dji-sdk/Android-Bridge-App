@@ -91,6 +91,11 @@ public class WSConnectionManager extends WebSocketServer implements ConnectionMa
     }
 
     @Override
+    public void onStart() {
+
+    }
+
+    @Override
     public void onWebsocketPing(WebSocket webSocket, Framedata framedata) {
         ByteBuffer buffer = framedata.getPayloadData();
         String message = new String(buffer.array(), StandardCharsets.UTF_8);
@@ -258,17 +263,20 @@ public class WSConnectionManager extends WebSocketServer implements ConnectionMa
                         // Do nothing because we don't want to over flow the internal buffer of WebSocket
                         // This could happen when usb is fast but the connection is slow ( producer/consumer problem)
                         isSlowTraffic = true;
+                        conn.close();
                     } else {
                         conn.send(b);
                         isSlowTraffic = false;
                     }
-                    String hostName = "";
-                    if (conn != null && conn.getRemoteSocketAddress() != null) {
-                        hostName = conn.getRemoteSocketAddress().getHostName();
+                    if (isSlowTraffic) {
+                        String hostName = "";
+                        if (conn != null && conn.getRemoteSocketAddress() != null) {
+                            hostName = conn.getRemoteSocketAddress().getHostName();
+                        }
+                        BridgeApplication.getInstance()
+                                .getBus()
+                                .post(new WSTrafficEvent(isSlowTraffic, hostName));
                     }
-                    BridgeApplication.getInstance()
-                            .getBus()
-                            .post(new WSTrafficEvent(isSlowTraffic, hostName));
                     //DJIRemoteLogger.d("SOURCE", DJIRemoteLogger.sha1Hash(b) + " -- " + DJIRemoteLogger.bytesToHex(b));
                 }
             }
