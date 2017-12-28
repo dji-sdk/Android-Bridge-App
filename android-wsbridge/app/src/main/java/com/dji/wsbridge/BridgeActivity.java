@@ -311,7 +311,7 @@ public class BridgeActivity extends Activity {
         if (event.isSlowConnection()) {
             if (isWSTrafficSlow.compareAndSet(false, true)) {
                 shouldRefresh = true;
-                showToast("Bad Connection!");
+                showToast("Bad Connection: " + event.getMessage() + "!");
             }
         } else {
             if (isWSTrafficSlow.compareAndSet(true, false)) {

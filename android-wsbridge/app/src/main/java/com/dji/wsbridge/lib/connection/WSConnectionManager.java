@@ -245,26 +245,30 @@ public class WSConnectionManager extends WebSocketServer implements ConnectionMa
     }
 
     public synchronized void send(byte[] b) {
-        Collection<WebSocket> con = connections();
+        final Collection<WebSocket> con = connections();
         if (txStatTracker != null) {
             txStatTracker.increaseByteCount(b.length);
         }
         if (con.size() > 0) {
             final int maxBufferSizePerConnection = MAX_BUFFER_SIZE / con.size();
-            for (WebSocket c : con) {
-                if (c.isOpen()) {
+            for (WebSocket conn : con) {
+                if (conn.isOpen()) {
                     final boolean isSlowTraffic;
-                    if (c instanceof WebSocketImpl && ((WebSocketImpl) c).outQueue.size() > maxBufferSizePerConnection) {
+                    if (conn instanceof WebSocketImpl && ((WebSocketImpl) conn).outQueue.size() > maxBufferSizePerConnection) {
                         // Do nothing because we don't want to over flow the internal buffer of WebSocket
                         // This could happen when usb is fast but the connection is slow ( producer/consumer problem)
                         isSlowTraffic = true;
                     } else {
-                        c.send(b);
+                        conn.send(b);
                         isSlowTraffic = false;
+                    }
+                    String hostName = "";
+                    if (conn != null && conn.getRemoteSocketAddress() != null) {
+                        hostName = conn.getRemoteSocketAddress().getHostName();
                     }
                     BridgeApplication.getInstance()
                             .getBus()
-                            .post(new WSTrafficEvent(isSlowTraffic));
+                            .post(new WSTrafficEvent(isSlowTraffic, hostName));
                     //DJIRemoteLogger.d("SOURCE", DJIRemoteLogger.sha1Hash(b) + " -- " + DJIRemoteLogger.bytesToHex(b));
                 }
             }
@@ -312,13 +316,19 @@ public class WSConnectionManager extends WebSocketServer implements ConnectionMa
      */
     public static final class WSTrafficEvent {
         final boolean isSlowConnection;
+        final String message;
 
-        public WSTrafficEvent(boolean isSlowConnection) {
+        public WSTrafficEvent(boolean isSlowConnection, String message) {
             this.isSlowConnection = isSlowConnection;
+            this.message = message;
         }
 
         public boolean isSlowConnection() {
             return isSlowConnection;
+        }
+
+        public String getMessage() {
+            return message;
         }
     }
 
