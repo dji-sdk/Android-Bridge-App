@@ -1,6 +1,5 @@
 package com.dji.wsbridge.lib;
 
-import android.text.TextUtils;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -11,7 +10,7 @@ import java.util.List;
 
 public class Utils {
 
-    public static final String REMOTE_LOGGER_URL = "http://10.128.128.30:4567"; //PALO ALTO JENKINS SERVER
+
     /**
      * Convert byte array to hex string
      */
@@ -134,18 +133,5 @@ public class Utils {
         return "";
     }
 
-    public static void configureLogger() {
-        DJIRemoteLogger.setServerURL(REMOTE_LOGGER_URL);
-        final String ip = Utils.getIPAddress(true);
-        // Set the last group of IP address to be DeviceID
-        String deviceID = "";
-        if (!TextUtils.isEmpty(ip)) {
-            final String[] split = ip.split("\\.");
-            if (split.length > 0) {
-                deviceID = split[split.length - 1];
-            }
-            DJIRemoteLogger.setDeviceID(deviceID);
-            DJIRemoteLogger.setEnabled(true);
-        }
-    }
+
 }

@@ -1,7 +1,7 @@
 package com.dji.wsbridge.lib.connection;
 
 import com.dji.wsbridge.lib.BridgeApplication;
-import com.dji.wsbridge.lib.DJIRemoteLogger;
+import com.dji.wsbridge.lib.DJILogger;
 import com.dji.wsbridge.lib.NetworkServerInputStream;
 import com.dji.wsbridge.lib.NetworkServerOutputStream;
 
@@ -59,14 +59,14 @@ public class WSConnectionManager extends WebSocketServer implements ConnectionMa
     }
 
     public static void setupInstance(int port) throws UnknownHostException {
-        DJIRemoteLogger.d(TAG, "setupInstance ");
+        DJILogger.d(TAG, "setupInstance ");
         instance = new WSConnectionManager(port);
         instance.start();
     }
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        DJIRemoteLogger.d(TAG, "onOpen ");
+        DJILogger.d(TAG, "onOpen ");
         sendConnectivityStatus(true, conn);
         lastPingTime = System.currentTimeMillis();
         setupKeepAlivePolling();
@@ -74,7 +74,7 @@ public class WSConnectionManager extends WebSocketServer implements ConnectionMa
 
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-        DJIRemoteLogger.d(TAG, "onClose ");
+        DJILogger.d(TAG, "onClose ");
         sendConnectivityStatus(false, conn);
         if (activeConnectionCount() <= 0) {
             stopKeepAlivePolling();
@@ -83,16 +83,11 @@ public class WSConnectionManager extends WebSocketServer implements ConnectionMa
 
     @Override
     public void onError(WebSocket conn, Exception ex) {
-        DJIRemoteLogger.d(TAG, "onError " + ex.getMessage());
+        DJILogger.d(TAG, "onError " + ex.getMessage());
         sendConnectivityStatus(false, conn);
         if (activeConnectionCount() <= 0) {
             stopKeepAlivePolling();
         }
-    }
-
-    @Override
-    public void onStart() {
-
     }
 
     @Override
@@ -160,7 +155,7 @@ public class WSConnectionManager extends WebSocketServer implements ConnectionMa
                             final WebSocket eachConnection = iterator.next();
                             sendConnectivityStatus(false, eachConnection);
                             eachConnection.close();
-                            DJIRemoteLogger.e(TAG,
+                            DJILogger.e(TAG,
                                     "Disconnecting Network. No Pings for "
                                             + String.format(Locale.US,
                                             "%.2f",
@@ -224,7 +219,7 @@ public class WSConnectionManager extends WebSocketServer implements ConnectionMa
             mQueue.removeFirst();
         }
         mQueue.add(buffer);
-        //DJIRemoteLogger.d(TAG, "onMessage" + buffer.array().length);
+        //DJILogger.d(TAG, "onMessage" + buffer.array().length);
         if (rxStatTracker != null) {
             rxStatTracker.increaseByteCount(buffer.limit());
         }
@@ -232,7 +227,7 @@ public class WSConnectionManager extends WebSocketServer implements ConnectionMa
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        //DJIRemoteLogger.d(TAG, "onMessage "+message);
+        //DJILogger.d(TAG, "onMessage "+message);
         System.out.println(conn + ": " + message);
     }
 
@@ -249,35 +244,24 @@ public class WSConnectionManager extends WebSocketServer implements ConnectionMa
         return mLast;
     }
 
-    public synchronized void send(byte[] b) {
-        final Collection<WebSocket> con = connections();
+    public void send(byte[] b) {
+        Collection<WebSocket> con = connections();
         if (txStatTracker != null) {
             txStatTracker.increaseByteCount(b.length);
         }
-        if (con.size() > 0) {
+        if (activeConnectionCount() > 0) {
             final int maxBufferSizePerConnection = MAX_BUFFER_SIZE / con.size();
-            for (WebSocket conn : con) {
-                if (conn.isOpen()) {
-                    final boolean isSlowTraffic;
-                    if (conn instanceof WebSocketImpl && ((WebSocketImpl) conn).outQueue.size() > maxBufferSizePerConnection) {
-                        // Do nothing because we don't want to over flow the internal buffer of WebSocket
-                        // This could happen when usb is fast but the connection is slow ( producer/consumer problem)
-                        isSlowTraffic = true;
-                        conn.close();
-                    } else {
-                        conn.send(b);
-                        isSlowTraffic = false;
-                    }
-                    if (isSlowTraffic) {
-                        String hostName = "";
-                        if (conn != null && conn.getRemoteSocketAddress() != null) {
-                            hostName = conn.getRemoteSocketAddress().getHostName();
+            synchronized (con) {
+                for (WebSocket c : con) {
+                    if (c.isOpen()) {
+                        if (c instanceof WebSocketImpl && ((WebSocketImpl) c).outQueue.size() > maxBufferSizePerConnection) {
+                            // Do nothing because we don't want to over flow the internal buffer of WebSocket
+                            // This could happen when usb is fast but the connection is slow ( producer/consumer problem)
+                        } else {
+                            c.send(b);
                         }
-                        BridgeApplication.getInstance()
-                                .getBus()
-                                .post(new WSTrafficEvent(isSlowTraffic, hostName));
+                        //DJILogger.d("SOURCE", DJILogger.sha1Hash(b) + " -- " + DJILogger.bytesToHex(b));
                     }
-                    //DJIRemoteLogger.d("SOURCE", DJIRemoteLogger.sha1Hash(b) + " -- " + DJIRemoteLogger.bytesToHex(b));
                 }
             }
         }
@@ -316,27 +300,6 @@ public class WSConnectionManager extends WebSocketServer implements ConnectionMa
 
         public int getActiveConnectionCount() {
             return activeConnectionCount;
-        }
-    }
-
-    /**
-     * Event to notify changes in WebSocket Traffic
-     */
-    public static final class WSTrafficEvent {
-        final boolean isSlowConnection;
-        final String message;
-
-        public WSTrafficEvent(boolean isSlowConnection, String message) {
-            this.isSlowConnection = isSlowConnection;
-            this.message = message;
-        }
-
-        public boolean isSlowConnection() {
-            return isSlowConnection;
-        }
-
-        public String getMessage() {
-            return message;
         }
     }
 

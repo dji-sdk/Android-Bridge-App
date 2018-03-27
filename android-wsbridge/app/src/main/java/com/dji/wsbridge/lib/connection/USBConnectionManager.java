@@ -11,7 +11,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import com.dji.wsbridge.BridgeActivity;
 import com.dji.wsbridge.lib.BridgeApplication;
-import com.dji.wsbridge.lib.DJIRemoteLogger;
+import com.dji.wsbridge.lib.DJILogger;
+
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.annotations.NonNull;
@@ -113,7 +114,7 @@ public class USBConnectionManager implements ConnectionManager {
                 Log.d(TAG, "RC CONNECTED");
             } else {
                 Log.d(TAG, "NO Permission to USB Accessory");
-                DJIRemoteLogger.e(TAG, "NO Permission to USB Accessory");
+                DJILogger.e(TAG, "NO Permission to USB Accessory");
                 //mUsbManager.requestPermission(mAccessory, null);
             }
         } else {
@@ -133,13 +134,13 @@ public class USBConnectionManager implements ConnectionManager {
                         mInStream = new FileInputStream(fd);
                         mOutStream = new FileOutputStream(fd);
                     } else {
-                        DJIRemoteLogger.e(TAG, "Invalid File Descriptor");
+                        DJILogger.e(TAG, "Invalid File Descriptor");
                     }
                 } else {
-                    DJIRemoteLogger.e(TAG, "Cannot Open Accessory");
+                    DJILogger.e(TAG, "Cannot Open Accessory");
                 }
             } else {
-                DJIRemoteLogger.e(TAG, "Accessory NOT available");
+                DJILogger.e(TAG, "Accessory NOT available");
             }
         } catch (Exception e) {
 
