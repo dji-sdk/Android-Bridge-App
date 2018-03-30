@@ -91,6 +91,11 @@ public class WSConnectionManager extends WebSocketServer implements ConnectionMa
     }
 
     @Override
+    public void onStart() {
+
+    }
+
+    @Override
     public void onWebsocketPing(WebSocket webSocket, Framedata framedata) {
         ByteBuffer buffer = framedata.getPayloadData();
         String message = new String(buffer.array(), StandardCharsets.UTF_8);
@@ -252,13 +257,25 @@ public class WSConnectionManager extends WebSocketServer implements ConnectionMa
         if (activeConnectionCount() > 0) {
             final int maxBufferSizePerConnection = MAX_BUFFER_SIZE / con.size();
             synchronized (con) {
-                for (WebSocket c : con) {
-                    if (c.isOpen()) {
-                        if (c instanceof WebSocketImpl && ((WebSocketImpl) c).outQueue.size() > maxBufferSizePerConnection) {
+                for (WebSocket conn : con) {
+                    if (conn.isOpen()) {
+                        final boolean isSlowTraffic;
+                        if (conn instanceof WebSocketImpl && ((WebSocketImpl) conn).outQueue.size() > maxBufferSizePerConnection) {
                             // Do nothing because we don't want to over flow the internal buffer of WebSocket
                             // This could happen when usb is fast but the connection is slow ( producer/consumer problem)
+                            isSlowTraffic = true;
                         } else {
-                            c.send(b);
+                            conn.send(b);
+                            isSlowTraffic = false;
+                        }
+                        if (isSlowTraffic) {
+                            String hostName = "";
+                            if (conn != null && conn.getRemoteSocketAddress() != null) {
+                                hostName = conn.getRemoteSocketAddress().getHostName();
+                            }
+                            BridgeApplication.getInstance()
+                                    .getBus()
+                                    .post(new WSTrafficEvent(isSlowTraffic, hostName));
                         }
                         //DJILogger.d("SOURCE", DJILogger.sha1Hash(b) + " -- " + DJILogger.bytesToHex(b));
                     }
@@ -300,6 +317,27 @@ public class WSConnectionManager extends WebSocketServer implements ConnectionMa
 
         public int getActiveConnectionCount() {
             return activeConnectionCount;
+        }
+    }
+
+    /**
+     * Event to notify changes in WebSocket Traffic
+     */
+    public static final class WSTrafficEvent {
+        final boolean isSlowConnection;
+        final String message;
+
+        public WSTrafficEvent(boolean isSlowConnection, String message) {
+            this.isSlowConnection = isSlowConnection;
+            this.message = message;
+        }
+
+        public boolean isSlowConnection() {
+            return isSlowConnection;
+        }
+
+        public String getMessage() {
+            return message;
         }
     }
 

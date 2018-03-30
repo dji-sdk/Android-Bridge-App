@@ -44,6 +44,7 @@ public class BridgeActivity extends Activity {
     private AtomicBoolean isUSBConnected = new AtomicBoolean(false);
     private AtomicBoolean isRCConnected = new AtomicBoolean(false);
     private AtomicBoolean isWiFiConnected = new AtomicBoolean(false);
+    private AtomicBoolean isWSTrafficSlow = new AtomicBoolean(false);
     private AtomicBoolean isStreamRunnerActive = new AtomicBoolean(false);
     private InputStream usbInputStream;
     private OutputStream usbOutputStream;
@@ -324,6 +325,25 @@ public class BridgeActivity extends Activity {
             refresh();
         }
         showToast("Network ", isWiFiConnected.get(), event.getMessage());
+    }
+
+    @Subscribe
+    public void onWSTrafficEvent(WSConnectionManager.WSTrafficEvent event) {
+
+        boolean shouldRefresh = false;
+        if (event.isSlowConnection()) {
+            if (isWSTrafficSlow.compareAndSet(false, true)) {
+                shouldRefresh = true;
+                showToast("Bad Network Connection: " + event.getMessage() + "!", isWiFiConnected.get(), event.getMessage());
+            }
+        } else {
+            if (isWSTrafficSlow.compareAndSet(true, false)) {
+                shouldRefresh = true;
+            }
+        }
+        if (shouldRefresh) {
+            refresh();
+        }
     }
     //endregion -----------------------------------------------------------------------------------------------------
 
