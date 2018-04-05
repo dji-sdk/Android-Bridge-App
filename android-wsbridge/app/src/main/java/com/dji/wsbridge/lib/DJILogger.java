@@ -9,6 +9,7 @@ import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.error.ANError;
 import com.androidnetworking.interfaces.OkHttpResponseListener;
 import com.crashlytics.android.Crashlytics;
+import com.dji.wsbridge.BuildConfig;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,7 +33,7 @@ public class DJILogger extends Thread {
     public static final int CONNECTION_BRIDGE = 2;
     private static final String TAG = "RemoteLogger";
     // Add your remote server IP
-    private static final String REMOTE_LOGGER_URL = "your_url_goes_here.com";
+    private static final String REMOTE_LOGGER_URL = BuildConfig.REMOTE_LOGGER_URL;
     private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
     private static DJILogger instance = new DJILogger();
     private String serverURL;

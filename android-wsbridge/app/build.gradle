@@ -25,11 +25,15 @@ android {
         versionCode 1
         versionName "1.2.4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        buildConfigField "String", "REMOTE_LOGGER_URL", getRemoteLoggerURL()
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        all {
+            buildConfigField "String", "REMOTE_LOGGER_URL", "\"your_url_goes_here.com\""
         }
     }
 }
@@ -51,6 +55,13 @@ dependencies {
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
     debugCompile  'com.github.markzhai:blockcanary-android:1.5.0'
     releaseCompile 'com.github.markzhai:blockcanary-no-op:1.5.0'
+}
 
-
+/**
+ *
+ * @return return the entered value if there is any, if not empty string
+ */
+def getRemoteLoggerURL() {
+    def value = project.getProperties().get("remoteLoggerURL")
+    return value != null ? "\"" + value + "\"" : "\"\""
 }
