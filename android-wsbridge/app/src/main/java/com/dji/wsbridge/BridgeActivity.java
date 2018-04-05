@@ -14,7 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dji.wsbridge.lib.BridgeApplication;
-import com.dji.wsbridge.lib.DJIRemoteLogger;
+import com.dji.wsbridge.lib.DJILogger;
 import com.dji.wsbridge.lib.StreamRunner;
 import com.dji.wsbridge.lib.Utils;
 import com.dji.wsbridge.lib.connection.USBConnectionManager;
@@ -25,22 +25,27 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
 
 public class BridgeActivity extends Activity {
 
     public static final String TAG = "AndroidBridge";
     private static final int WEB_SOCKET_PORT = 9007;
+    private static final Observable HEART_BEAT = Observable.timer(2, TimeUnit.SECONDS).repeat().observeOn(AndroidSchedulers.mainThread());
     public static AtomicBoolean isStarted = new AtomicBoolean(false);
     private TextView mIPTextView;
     private ImageView mRCIconView;
     private ImageView mWifiIconView;
     private AtomicBoolean isUSBConnected = new AtomicBoolean(false);
     private AtomicBoolean isRCConnected = new AtomicBoolean(false);
-    private AtomicBoolean isWSConnected = new AtomicBoolean(false);
+    private AtomicBoolean isWiFiConnected = new AtomicBoolean(false);
     private AtomicBoolean isWSTrafficSlow = new AtomicBoolean(false);
     private AtomicBoolean isStreamRunnerActive = new AtomicBoolean(false);
-
     private InputStream usbInputStream;
     private OutputStream usbOutputStream;
     private InputStream wsInputStream;
@@ -52,22 +57,25 @@ public class BridgeActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Utils.configureLogger();
+        DJILogger.init();
         setupViews();
         setupWSConnectionManager();
+        startHeartBeat();
+
     }
+
 
     @Override
     protected void onStart() {
         super.onStart();
         refresh();
-        DJIRemoteLogger.v(TAG, "Started");
+        DJILogger.v(TAG, "Started");
         isStarted.set(true);
     }
 
     @Override
     protected void onStop() {
-        DJIRemoteLogger.v(TAG, "Stopped");
+        DJILogger.v(TAG, "Stopped");
         isStarted.set(false);
         super.onStop();
     }
@@ -76,13 +84,14 @@ public class BridgeActivity extends Activity {
     protected void onResume() {
         super.onResume();
         BridgeApplication.getInstance().getBus().register(this);
+        DJILogger.init();
         USBConnectionManager.getInstance().init();
-        DJIRemoteLogger.v(TAG, "Resumed");
+        DJILogger.v(TAG, "Resumed");
     }
 
     @Override
     protected void onPause() {
-        DJIRemoteLogger.v(TAG, "Paused");
+        DJILogger.v(TAG, "Paused");
         USBConnectionManager.getInstance().destroy();
         stopStreamTransfer();
         BridgeApplication.getInstance().getBus().unregister(this);
@@ -91,7 +100,7 @@ public class BridgeActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        DJIRemoteLogger.v(TAG, "Destroyed");
+        DJILogger.v(TAG, "Destroyed");
         super.onDestroy();
     }
 
@@ -142,26 +151,45 @@ public class BridgeActivity extends Activity {
                     if (isRCConnected.get()) {
                         mRCIconView.setColorFilter(getResources().getColor(android.R.color.holo_green_light),
                                 PorterDuff.Mode.MULTIPLY);
+                        DJILogger.logConnectionChange(DJILogger.CONNECTION_RC, DJILogger.CONNECTION_GOOD);
                     } else {
                         mRCIconView.setColorFilter(getResources().getColor(android.R.color.holo_purple),
                                 android.graphics.PorterDuff.Mode.MULTIPLY);
+                        DJILogger.logConnectionChange(DJILogger.CONNECTION_RC, DJILogger.CONNTECTION_WARNING);
                     }
                 } else {
                     if (isRCConnected.get()) {
                         mRCIconView.setColorFilter(getResources().getColor(android.R.color.holo_purple),
                                 android.graphics.PorterDuff.Mode.MULTIPLY);
+                        DJILogger.logConnectionChange(DJILogger.CONNECTION_RC, DJILogger.CONNTECTION_WARNING);
                     } else {
                         mRCIconView.setColorFilter(getResources().getColor(android.R.color.holo_red_light),
                                 PorterDuff.Mode.MULTIPLY);
+                        DJILogger.logConnectionChange(DJILogger.CONNECTION_RC, DJILogger.CONNECTION_BAD);
                     }
                 }
-                if (isWSConnected.get()) {
+                if (isWiFiConnected.get()) {
                     mWifiIconView.setColorFilter(getResources().getColor(android.R.color.holo_green_light),
                             PorterDuff.Mode.MULTIPLY);
+                    DJILogger.logConnectionChange(DJILogger.CONNECTION_BRIDGE, DJILogger.CONNECTION_GOOD);
                 } else {
                     mWifiIconView.setColorFilter(getResources().getColor(android.R.color.holo_red_light),
                             PorterDuff.Mode.MULTIPLY);
+                    DJILogger.logConnectionChange(DJILogger.CONNECTION_BRIDGE, DJILogger.CONNECTION_BAD);
+
                 }
+            }
+        });
+    }
+
+    /**
+     * This is to make sure the app keeps sending some message every 2 seconds to the server
+     */
+    private void startHeartBeat() {
+        HEART_BEAT.subscribe(new Consumer() {
+            @Override
+            public void accept(Object o) throws Exception {
+                refreshViews();
             }
         });
     }
@@ -170,7 +198,7 @@ public class BridgeActivity extends Activity {
         if (!runnerStateIsIncorrect()) {
             return;
         }
-        if (isUSBConnected.get() && isRCConnected.get() && isWSConnected.get() && !isStreamRunnerActive.get()) {
+        if (isUSBConnected.get() && isRCConnected.get() && isWiFiConnected.get() && !isStreamRunnerActive.get()) {
             if (setupStreams()) {
                 Log.d(TAG, "Starting Runners");
                 isStreamRunnerActive.set(true);
@@ -180,11 +208,11 @@ public class BridgeActivity extends Activity {
                 wsToDeviceRunner.start();
             } else {
                 Log.d(TAG, "Stream Transfers NOT started");
-                DJIRemoteLogger.e(TAG, "Stream Transfers NOT started");
+                DJILogger.e(TAG, "Stream Transfers NOT started");
             }
         } else {
             if (isStreamRunnerActive.get() && (!isUSBConnected.get() || !isRCConnected.get())
-                    || !isWSConnected.get()) {
+                    || !isWiFiConnected.get()) {
                 Log.d(TAG, "Stopping Runners");
                 stopStreamTransfer();
             } else {
@@ -205,7 +233,7 @@ public class BridgeActivity extends Activity {
      * Check weather all the connections are connected
      */
     private boolean areAllConnectionsGreen() {
-        return isUSBConnected.get() && isRCConnected.get() && isWSConnected.get();
+        return isUSBConnected.get() && isRCConnected.get() && isWiFiConnected.get();
     }
 
     private boolean setupStreams() {
@@ -216,7 +244,7 @@ public class BridgeActivity extends Activity {
             usbOutputStream = (OutputStream) deviceStreams.get(1);
         } else {
             Log.d(TAG, "USB Streams not available");
-            DJIRemoteLogger.e(TAG, "USB Streams not available");
+            DJILogger.e(TAG, "USB Streams not available");
             return false;
         }
 
@@ -226,7 +254,7 @@ public class BridgeActivity extends Activity {
             wsOutputStream = (OutputStream) wsStreams.get(1);
         } else {
             Log.d(TAG, "WS Streams not available");
-            DJIRemoteLogger.e(TAG, "WS Streams not available");
+            DJILogger.e(TAG, "WS Streams not available");
             return false;
         }
 
@@ -285,18 +313,18 @@ public class BridgeActivity extends Activity {
     public void onWSConnectionEvent(WSConnectionManager.WSConnectionEvent event) {
         boolean shouldRefresh = false;
         if (event.getActiveConnectionCount() > 0) {
-            if (isWSConnected.compareAndSet(false, true)) {
+            if (isWiFiConnected.compareAndSet(false, true)) {
                 shouldRefresh = true;
             }
         } else {
-            if (isWSConnected.compareAndSet(true, false)) {
+            if (isWiFiConnected.compareAndSet(true, false)) {
                 shouldRefresh = true;
             }
         }
         if (shouldRefresh) {
             refresh();
         }
-        showToast("Network ", isWSConnected.get(), event.getMessage());
+        showToast("Network ", isWiFiConnected.get(), event.getMessage());
     }
 
     @Subscribe
@@ -306,7 +334,7 @@ public class BridgeActivity extends Activity {
         if (event.isSlowConnection()) {
             if (isWSTrafficSlow.compareAndSet(false, true)) {
                 shouldRefresh = true;
-                showToast("Bad Connection: " + event.getMessage() + "!");
+                showToast("Bad Network Connection: " + event.getMessage() + "!", isWiFiConnected.get(), event.getMessage());
             }
         } else {
             if (isWSTrafficSlow.compareAndSet(true, false)) {
@@ -329,18 +357,7 @@ public class BridgeActivity extends Activity {
             @Override
             public void run() {
                 Toast.makeText(getApplicationContext(), finalMessage, Toast.LENGTH_SHORT).show();
-                DJIRemoteLogger.i(TAG, finalMessage);
-            }
-        });
-    }
-
-    private void showToast(final String message) {
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
-                DJIRemoteLogger.i(TAG, message);
+                DJILogger.i(TAG, finalMessage);
             }
         });
     }
