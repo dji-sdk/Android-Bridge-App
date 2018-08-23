@@ -51,9 +51,10 @@ dependencies {
     // explicitly depend on RxJava's latest version for bug fixes and new features.
     compile 'io.reactivex.rxjava2:rxjava:2.1.3'
     compile 'com.android.support:support-annotations:25.0.1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
-    debugCompile  'com.github.markzhai:blockcanary-android:1.5.0'
+    debugCompile 'com.github.markzhai:blockcanary-android:1.5.0'
     releaseCompile 'com.github.markzhai:blockcanary-no-op:1.5.0'
 }
 

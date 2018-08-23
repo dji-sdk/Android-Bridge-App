@@ -3,4 +3,13 @@
     <string name="dummy_content">Link\nReset</string>
     <string name="app_name">DJI Bridge</string>
     <string name="default_ip_address">192.168.1.1</string>
+    <string name="settings">Settings</string>
+    <string name="updated_app_url">move</string>
+    <string name="version_check_url">move</string>
+    <string name="intent_filter_update_available">move</string>
+    <string name="preference_auto_update_key">autoupdatekey</string>
+    <string name="preference_update_uri">updateuri</string>
+    <string name="preference_update_mimetype">updatemimetype</string>
+    <string name="auto_update_msg">Auto update permits the app to update in the background without user intervention.</string>
+    <string name="auto_update_msg_root">REQUIRES ROOT ACCESS. Auto update will permit the app to update in the background without user intervention.</string>
 </resources>

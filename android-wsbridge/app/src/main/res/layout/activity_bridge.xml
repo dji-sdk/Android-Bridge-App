@@ -112,6 +112,22 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:text="1.0"/>
+        <ImageButton
+            android:layout_margin="20dp"
+            android:id="@+id/btnSettings"
+            android:layout_gravity="bottom"
+            android:background="@android:color/transparent"
+            android:src="@android:drawable/ic_menu_preferences"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <ImageButton
+            android:layout_margin="20dp"
+            android:id="@+id/btnInstallUpdate"
+            android:layout_gravity="bottom|right"
+            android:background="@android:color/transparent"
+            android:src="@android:drawable/ic_dialog_alert"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
     </FrameLayout>
 
 </FrameLayout>
