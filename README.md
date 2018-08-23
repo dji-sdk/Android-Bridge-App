@@ -42,7 +42,39 @@ The steps to make the bridge app work are:
 * Device 2:
 
   * Device 2 should be running a DJI Mobile SDK based application.
-  * The IP address of Device 1 should be passed to `enableBridgeModeWithBridgeAppIP` in `SDKManager` to connect with Device 1.
+  * The IP address of Device 1 should be passed to `enableBridgeModeWithBridgeAppIP` in `SDKManager` to connect with Device 1. `enableBridgeModeWithBridgeAppIP` must be called after the sdk has registered.
+```java
+new DJISDKManager.SDKManagerCallback() {
+
+        @Override
+        public void onRegister(DJIError error) {
+            isRegistrationInProgress.set(false);
+            if (error == DJISDKError.REGISTRATION_SUCCESS) {
+                // ...
+                // ADD CALL HERE
+                DJISDKManager.getInstance().enableBridgeModeWithBridgeAppIP("YOUR IP");
+            } else {
+            	// ...
+            }
+        }
+        @Override
+        public void onProductDisconnect() {
+        	// ...
+        }
+
+        @Override
+        public void onProductConnect(BaseProduct product) {
+        	// ...
+        }
+
+        @Override
+        public void onComponentChange(BaseProduct.ComponentKey key,
+                                      BaseComponent oldComponent,
+                                      BaseComponent newComponent) {
+          	// ...
+        }
+    };
+```
   * Make sure the red light in the top left corner of Device 2's screen turns green - this shows Device 2 is connected with Device 1.
   * The application can now be run remotely.
 
