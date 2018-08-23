@@ -87,8 +87,6 @@ public class BridgeActivity extends Activity {
         setupWSConnectionManager();
         startHeartBeat();
         setupUpdateService();
-
-
     }
 
     private void setupUpdateService() {
@@ -107,7 +105,7 @@ public class BridgeActivity extends Activity {
         };
         updateAvailableFilter = new IntentFilter(getResources().getString(R.string.intent_filter_update_available));
 
-        bridgeUpdateService = new BridgeUpdateService(this);
+        bridgeUpdateService = new BridgeUpdateService();
         bridgeServiceIntent = new Intent(this, bridgeUpdateService.getClass());
         if (!isMyServiceRunning(bridgeUpdateService.getClass())) {
             startService(bridgeServiceIntent);

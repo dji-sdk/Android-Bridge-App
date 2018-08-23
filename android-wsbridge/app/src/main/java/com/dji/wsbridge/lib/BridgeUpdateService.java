@@ -22,6 +22,7 @@ import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.error.ANError;
 import com.androidnetworking.interfaces.StringRequestListener;
 import com.dji.wsbridge.BridgeActivity;
+import com.dji.wsbridge.BuildConfig;
 import com.dji.wsbridge.R;
 
 import org.json.JSONObject;
@@ -35,23 +36,20 @@ import java.util.TimerTask;
  */
 
 public class BridgeUpdateService extends Service {
+
+    public static final String UPDATED_APP_URL = BuildConfig.BASE_URL + "/bridgeapp.apk";
+    public static final String VERSION_CHECK_URL = BuildConfig.BASE_URL + "/getBridgeVersion.php";
+
     //get url of app on server
     private static final String SYSTEM_PACKAGE_NAME = "android";
-    int counter = 0;
-    Handler myHandler;
-    long oldTime = 0;
+    private int counter = 0;
+    private Handler myHandler;
     private Timer timer;
     private TimerTask timerTask;
 
     SharedPreferences sharedPreferences;
 
-    public BridgeUpdateService(Context applicationContext) {
-        super();
-        Log.i("HERE", "here I am!");
-    }
-
     public BridgeUpdateService() {
-
     }
 
     @Nullable
@@ -128,7 +126,7 @@ public class BridgeUpdateService extends Service {
 
 
         //set downloadmanager
-        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(getResources().getString(R.string.updated_app_url)));
+        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(UPDATED_APP_URL));
         request.setDescription("Updating BridgeApp");
         request.setTitle("Update");
 
@@ -136,7 +134,7 @@ public class BridgeUpdateService extends Service {
         request.setDestinationUri(uri);
 
         // get download service and enqueue file
-        final DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+        final DownloadManager manager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
         final long downloadId = manager.enqueue(request);
 
         //set BroadcastReceiver to install app when .apk is downloaded
@@ -185,7 +183,7 @@ public class BridgeUpdateService extends Service {
 
         @Override
         public void run() {
-            AndroidNetworking.post(getResources().getString(R.string.version_check_url)).build().getAsString(new StringRequestListener() {
+            AndroidNetworking.post(VERSION_CHECK_URL).build().getAsString(new StringRequestListener() {
                 @Override
                 public void onResponse(String response) {
 

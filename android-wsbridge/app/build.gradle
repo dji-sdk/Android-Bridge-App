@@ -25,7 +25,7 @@ android {
         versionCode 1
         versionName "1.2.4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        buildConfigField "String", "REMOTE_LOGGER_URL", getRemoteLoggerURL()
+        buildConfigField "String", "BASE_URL", getBaseUrl()
     }
     buildTypes {
         release {
@@ -59,10 +59,10 @@ dependencies {
 }
 
 /**
- *
+ * e.g, ./gradlew -PbaseUrl=yoururl.com assembleDebug
  * @return return the entered value if there is any, if not empty string
  */
-def getRemoteLoggerURL() {
-    def value = project.getProperties().get("remoteLoggerURL")
+def getBaseUrl() {
+    def value = project.getProperties().get("baseUrl")
     return value != null ? "\"" + value + "\"" : "\"\""
 }

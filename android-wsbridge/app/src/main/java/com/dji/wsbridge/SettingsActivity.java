@@ -25,6 +25,7 @@ import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.common.Priority;
 import com.androidnetworking.error.ANError;
 import com.androidnetworking.interfaces.StringRequestListener;
+import com.dji.wsbridge.lib.BridgeUpdateService;
 import com.dji.wsbridge.lib.Utils;
 
 import org.json.JSONObject;
@@ -93,7 +94,7 @@ public class SettingsActivity extends Activity {
         buttonCheckUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AndroidNetworking.post(getResources().getString(R.string.version_check_url)).setPriority(Priority.IMMEDIATE).build().getAsString(new StringRequestListener() {
+                AndroidNetworking.post(BridgeUpdateService.VERSION_CHECK_URL).setPriority(Priority.IMMEDIATE).build().getAsString(new StringRequestListener() {
                     @Override
                     public void onResponse(String response) {
                         try {
@@ -142,7 +143,7 @@ public class SettingsActivity extends Activity {
 
 
         //set downloadmanager
-        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(getResources().getString(R.string.updated_app_url)));
+        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(BridgeUpdateService.UPDATED_APP_URL));
         request.setDescription("Updating BridgeApp");
         request.setTitle("Update");
 
