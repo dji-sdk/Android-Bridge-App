@@ -28,6 +28,10 @@ android {
         buildConfigField "String", "BASE_URL", getBaseUrl()
     }
     buildTypes {
+        // Only used internally by DJI
+        internal {
+            initWith buildTypes.debug
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -53,8 +57,10 @@ dependencies {
     compile 'com.android.support:support-annotations:25.0.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
+    internalCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
     debugCompile 'com.github.markzhai:blockcanary-android:1.5.0'
+    internalCompile 'com.github.markzhai:blockcanary-android:1.5.0'
     releaseCompile 'com.github.markzhai:blockcanary-no-op:1.5.0'
 }
 

@@ -90,27 +90,28 @@ public class BridgeActivity extends Activity {
     }
 
     private void setupUpdateService() {
-        updateAvailableReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                btnInstallUpdate.setVisibility(View.VISIBLE);
-                Animation mAnimation = new AlphaAnimation(1, 0);
-                mAnimation.setDuration(200);
-                mAnimation.setInterpolator(new LinearInterpolator());
-                mAnimation.setRepeatCount(Animation.INFINITE);
-                mAnimation.setRepeatMode(Animation.REVERSE);
+        if (isInternalVersion()) {
+            updateAvailableReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    btnInstallUpdate.setVisibility(View.VISIBLE);
+                    Animation mAnimation = new AlphaAnimation(1, 0);
+                    mAnimation.setDuration(200);
+                    mAnimation.setInterpolator(new LinearInterpolator());
+                    mAnimation.setRepeatCount(Animation.INFINITE);
+                    mAnimation.setRepeatMode(Animation.REVERSE);
 
-                btnInstallUpdate.startAnimation(mAnimation);
+                    btnInstallUpdate.startAnimation(mAnimation);
+                }
+            };
+            updateAvailableFilter = new IntentFilter(getResources().getString(R.string.intent_filter_update_available));
+
+            bridgeUpdateService = new BridgeUpdateService();
+            bridgeServiceIntent = new Intent(this, bridgeUpdateService.getClass());
+            if (!isMyServiceRunning(bridgeUpdateService.getClass())) {
+                startService(bridgeServiceIntent);
             }
-        };
-        updateAvailableFilter = new IntentFilter(getResources().getString(R.string.intent_filter_update_available));
-
-        bridgeUpdateService = new BridgeUpdateService();
-        bridgeServiceIntent = new Intent(this, bridgeUpdateService.getClass());
-        if (!isMyServiceRunning(bridgeUpdateService.getClass())) {
-            startService(bridgeServiceIntent);
         }
-
     }
 
 
@@ -135,7 +136,9 @@ public class BridgeActivity extends Activity {
         BridgeApplication.getInstance().getBus().register(this);
         DJILogger.init();
         USBConnectionManager.getInstance().init();
-        BridgeActivity.this.registerReceiver(updateAvailableReceiver, updateAvailableFilter);
+        if (isInternalVersion()) {
+            BridgeActivity.this.registerReceiver(updateAvailableReceiver, updateAvailableFilter);
+        }
         DJILogger.v(TAG, "Resumed");
     }
 
@@ -153,7 +156,9 @@ public class BridgeActivity extends Activity {
     @Override
     protected void onDestroy() {
         DJILogger.v(TAG, "Destroyed");
-        this.unregisterReceiver(updateAvailableReceiver);
+        if (isInternalVersion()) {
+            this.unregisterReceiver(updateAvailableReceiver);
+        }
         super.onDestroy();
     }
 
@@ -180,51 +185,7 @@ public class BridgeActivity extends Activity {
         mRCIconView = (ImageView) findViewById(R.id.imageViewRC);
         mWifiIconView = (ImageView) findViewById(R.id.imageViewWifi);
         TextView mVersionTextView = (TextView) findViewById(R.id.versionText);
-        btnSettings = (ImageButton) findViewById(R.id.btnSettings);
-        btnInstallUpdate = (ImageButton) findViewById(R.id.btnInstallUpdate);
-        btnInstallUpdate.setVisibility(View.GONE);
-        btnSettings.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent settingsIntent = new Intent(BridgeActivity.this, SettingsActivity.class);
-                startActivity(settingsIntent);
-
-            }
-        });
-        btnInstallUpdate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AlertDialog.Builder builder;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    builder = new AlertDialog.Builder(BridgeActivity.this, android.R.style.Theme_Material_Dialog_Alert);
-                } else {
-                    builder = new AlertDialog.Builder(BridgeActivity.this);
-                }
-                builder.setTitle("Update avaialble !")
-                        .setMessage("Update is available. Do you want to update the app?")
-                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                btnInstallUpdate.clearAnimation();
-                                btnInstallUpdate.setVisibility(View.GONE);
-                                Intent install = new Intent(Intent.ACTION_VIEW);
-                                install.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                Uri uri = Uri.parse(sharedPreferences.getString(getResources().getString(R.string.preference_update_uri), ""));
-                                install.setDataAndType(uri,
-                                        sharedPreferences.getString(getResources().getString(R.string.preference_update_mimetype), ""));
-                                startActivity(install);
-                            }
-                        })
-                        .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                // do nothing
-                            }
-                        })
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .show();
-
-            }
-        });
+        setUpUpdateViews();
 
         // Show version number
         try {
@@ -233,6 +194,56 @@ public class BridgeActivity extends Activity {
             mVersionTextView.setText(version);
         } catch (PackageManager.NameNotFoundException e) {
             mVersionTextView.setText("N/A");
+        }
+    }
+
+    private void setUpUpdateViews() {
+        btnSettings = (ImageButton) findViewById(R.id.btnSettings);
+        btnInstallUpdate = (ImageButton) findViewById(R.id.btnInstallUpdate);
+        if (isInternalVersion()) {
+            btnSettings.setVisibility(View.VISIBLE);
+            btnSettings.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent settingsIntent = new Intent(BridgeActivity.this, SettingsActivity.class);
+                    startActivity(settingsIntent);
+
+                }
+            });
+            btnInstallUpdate.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    AlertDialog.Builder builder;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        builder = new AlertDialog.Builder(BridgeActivity.this, android.R.style.Theme_Material_Dialog_Alert);
+                    } else {
+                        builder = new AlertDialog.Builder(BridgeActivity.this);
+                    }
+                    builder.setTitle("Update avaialble !")
+                            .setMessage("Update is available. Do you want to update the app?")
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    btnInstallUpdate.clearAnimation();
+                                    btnInstallUpdate.setVisibility(View.GONE);
+                                    Intent install = new Intent(Intent.ACTION_VIEW);
+                                    install.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                    install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    Uri uri = Uri.parse(sharedPreferences.getString(getResources().getString(R.string.preference_update_uri), ""));
+                                    install.setDataAndType(uri,
+                                            sharedPreferences.getString(getResources().getString(R.string.preference_update_mimetype), ""));
+                                    startActivity(install);
+                                }
+                            })
+                            .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // do nothing
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .show();
+
+                }
+            });
         }
     }
 
@@ -460,7 +471,6 @@ public class BridgeActivity extends Activity {
             }
         });
     }
-    //endregion
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
@@ -474,5 +484,9 @@ public class BridgeActivity extends Activity {
         return false;
     }
 
+    private boolean isInternalVersion() {
+        return BuildConfig.BUILD_TYPE == "internal";
+    }
 
+    //endregion
 }

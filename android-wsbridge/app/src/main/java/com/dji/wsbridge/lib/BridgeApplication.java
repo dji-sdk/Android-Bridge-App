@@ -25,7 +25,9 @@ public class BridgeApplication extends Application implements Application.Activi
     @Override
     public void onCreate() {
         super.onCreate();
-        Fabric.with(this, new Crashlytics());
+        if (BuildConfig.BUILD_TYPE != "debug") {
+            Fabric.with(this, new Crashlytics());
+        }
         DJILogger.init();
         instance = this;
         //registerActivityLifecycleCallbacks(this);
