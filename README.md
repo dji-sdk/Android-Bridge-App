@@ -28,6 +28,7 @@ When using the bridge app, two Android devices are used (or one device with the 
 2. An Android device running an SDK based application
 
 **Both devices** must be able to resolve each other's IP address - and should be **used on the same network**.
+Only wi-fi and ethernet connections have been tested to work.
 
 The steps to make the bridge app work are:
 
