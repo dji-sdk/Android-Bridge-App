@@ -68,3 +68,5 @@ Thumbs.db
 .DS_Store
 
 .gradle/
+.gradle/buildOutputCleanup
+build/
