@@ -27,7 +27,7 @@ When using the bridge app, two Android devices are used (or one device with the 
 1. An Android device with the BridgeApp apk that is connected directly to the remote controller
 2. An Android device running an SDK based application
 
-Both devices must be able to resolve each other's IP address - and are typically used on the same network.
+**Both devices** must be able to resolve each other's IP address - and should be **used on the same network**.
 
 The steps to make the bridge app work are:
 
