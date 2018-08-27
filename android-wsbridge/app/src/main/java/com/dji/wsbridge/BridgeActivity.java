@@ -1,19 +1,35 @@
 package com.dji.wsbridge;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
 import android.hardware.usb.UsbManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dji.wsbridge.lib.BridgeApplication;
+import com.dji.wsbridge.lib.BridgeUpdateService;
 import com.dji.wsbridge.lib.DJILogger;
 import com.dji.wsbridge.lib.StreamRunner;
 import com.dji.wsbridge.lib.Utils;
@@ -32,12 +48,18 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 
+
 public class BridgeActivity extends Activity {
 
     public static final String TAG = "AndroidBridge";
     private static final int WEB_SOCKET_PORT = 9007;
     private static final Observable HEART_BEAT = Observable.timer(2, TimeUnit.SECONDS).repeat().observeOn(AndroidSchedulers.mainThread());
     public static AtomicBoolean isStarted = new AtomicBoolean(false);
+    private Intent bridgeServiceIntent;
+    BroadcastReceiver updateAvailableReceiver;
+    IntentFilter updateAvailableFilter;
+    SharedPreferences sharedPreferences;
+    Context ctx;
     private TextView mIPTextView;
     private ImageView mRCIconView;
     private ImageView mWifiIconView;
@@ -52,6 +74,8 @@ public class BridgeActivity extends Activity {
     private OutputStream wsOutputStream;
     private StreamRunner deviceToWSRunner;
     private StreamRunner wsToDeviceRunner;
+    private ImageButton btnSettings, btnInstallUpdate;
+    private BridgeUpdateService bridgeUpdateService;
 
     //region -------------------------------------- Activity Callbacks and Helpers ---------------------------------------------
     @Override
@@ -59,9 +83,35 @@ public class BridgeActivity extends Activity {
         super.onCreate(savedInstanceState);
         DJILogger.init();
         setupViews();
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(BridgeActivity.this);
         setupWSConnectionManager();
         startHeartBeat();
+        setupUpdateService();
+    }
 
+    private void setupUpdateService() {
+        if (isInternalVersion()) {
+            updateAvailableReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    btnInstallUpdate.setVisibility(View.VISIBLE);
+                    Animation mAnimation = new AlphaAnimation(1, 0);
+                    mAnimation.setDuration(200);
+                    mAnimation.setInterpolator(new LinearInterpolator());
+                    mAnimation.setRepeatCount(Animation.INFINITE);
+                    mAnimation.setRepeatMode(Animation.REVERSE);
+
+                    btnInstallUpdate.startAnimation(mAnimation);
+                }
+            };
+            updateAvailableFilter = new IntentFilter(getResources().getString(R.string.intent_filter_update_available));
+
+            bridgeUpdateService = new BridgeUpdateService();
+            bridgeServiceIntent = new Intent(this, bridgeUpdateService.getClass());
+            if (!isMyServiceRunning(bridgeUpdateService.getClass())) {
+                startService(bridgeServiceIntent);
+            }
+        }
     }
 
 
@@ -86,6 +136,9 @@ public class BridgeActivity extends Activity {
         BridgeApplication.getInstance().getBus().register(this);
         DJILogger.init();
         USBConnectionManager.getInstance().init();
+        if (isInternalVersion()) {
+            BridgeActivity.this.registerReceiver(updateAvailableReceiver, updateAvailableFilter);
+        }
         DJILogger.v(TAG, "Resumed");
     }
 
@@ -95,12 +148,17 @@ public class BridgeActivity extends Activity {
         USBConnectionManager.getInstance().destroy();
         stopStreamTransfer();
         BridgeApplication.getInstance().getBus().unregister(this);
+
         super.onPause();
+
     }
 
     @Override
     protected void onDestroy() {
         DJILogger.v(TAG, "Destroyed");
+        if (isInternalVersion()) {
+            this.unregisterReceiver(updateAvailableReceiver);
+        }
         super.onDestroy();
     }
 
@@ -110,12 +168,12 @@ public class BridgeActivity extends Activity {
      */
     @Override
     protected void onNewIntent(Intent intent) {
-
-        switch (intent.getAction()) {
-            case UsbManager.ACTION_USB_ACCESSORY_ATTACHED:
-                BridgeApplication.getInstance().getBus().post(new USBConnectionManager.USBConnectionEvent(true));
-                break;
-        }
+        if (intent.getAction() != null)
+            switch (intent.getAction()) {
+                case UsbManager.ACTION_USB_ACCESSORY_ATTACHED:
+                    BridgeApplication.getInstance().getBus().post(new USBConnectionManager.USBConnectionEvent(true));
+                    break;
+            }
         super.onNewIntent(intent);
     }
 
@@ -127,6 +185,8 @@ public class BridgeActivity extends Activity {
         mRCIconView = (ImageView) findViewById(R.id.imageViewRC);
         mWifiIconView = (ImageView) findViewById(R.id.imageViewWifi);
         TextView mVersionTextView = (TextView) findViewById(R.id.versionText);
+        setUpUpdateViews();
+
         // Show version number
         try {
             PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
@@ -134,6 +194,56 @@ public class BridgeActivity extends Activity {
             mVersionTextView.setText(version);
         } catch (PackageManager.NameNotFoundException e) {
             mVersionTextView.setText("N/A");
+        }
+    }
+
+    private void setUpUpdateViews() {
+        btnSettings = (ImageButton) findViewById(R.id.btnSettings);
+        btnInstallUpdate = (ImageButton) findViewById(R.id.btnInstallUpdate);
+        if (isInternalVersion()) {
+            btnSettings.setVisibility(View.VISIBLE);
+            btnSettings.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent settingsIntent = new Intent(BridgeActivity.this, SettingsActivity.class);
+                    startActivity(settingsIntent);
+
+                }
+            });
+            btnInstallUpdate.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    AlertDialog.Builder builder;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        builder = new AlertDialog.Builder(BridgeActivity.this, android.R.style.Theme_Material_Dialog_Alert);
+                    } else {
+                        builder = new AlertDialog.Builder(BridgeActivity.this);
+                    }
+                    builder.setTitle("Update avaialble !")
+                            .setMessage("Update is available. Do you want to update the app?")
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    btnInstallUpdate.clearAnimation();
+                                    btnInstallUpdate.setVisibility(View.GONE);
+                                    Intent install = new Intent(Intent.ACTION_VIEW);
+                                    install.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                    install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    Uri uri = Uri.parse(sharedPreferences.getString(getResources().getString(R.string.preference_update_uri), ""));
+                                    install.setDataAndType(uri,
+                                            sharedPreferences.getString(getResources().getString(R.string.preference_update_mimetype), ""));
+                                    startActivity(install);
+                                }
+                            })
+                            .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // do nothing
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .show();
+
+                }
+            });
         }
     }
 
@@ -361,5 +471,22 @@ public class BridgeActivity extends Activity {
             }
         });
     }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                Log.i("isMyServiceRunning?", true + "");
+                return true;
+            }
+        }
+        Log.i("isMyServiceRunning?", false + "");
+        return false;
+    }
+
+    private boolean isInternalVersion() {
+        return BuildConfig.BUILD_TYPE == "internal";
+    }
+
     //endregion
 }

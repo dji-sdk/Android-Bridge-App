@@ -2,6 +2,7 @@ package com.dji.wsbridge.lib;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -133,5 +134,51 @@ public class Utils {
         return "";
     }
 
+    public static int compareVersionNames(String oldVersionName, String newVersionName) {
+        int res = 0;
 
+        String[] oldNumbers = oldVersionName.split("\\.");
+        String[] newNumbers = newVersionName.split("\\.");
+
+        // To avoid IndexOutOfBounds
+        int maxIndex = Math.min(oldNumbers.length, newNumbers.length);
+
+        for (int i = 0; i < maxIndex; i++) {
+            int oldVersionPart = Integer.valueOf(oldNumbers[i]);
+            int newVersionPart = Integer.valueOf(newNumbers[i]);
+
+            if (oldVersionPart < newVersionPart) {
+                res = -1;
+                break;
+            } else if (oldVersionPart > newVersionPart) {
+                res = 1;
+                break;
+            }
+        }
+
+        // If versions are the same so far, but they have different length...
+        if (res == 0 && oldNumbers.length != newNumbers.length) {
+            res = (oldNumbers.length > newNumbers.length) ? 1 : -1;
+        }
+
+        return res;
+    }
+
+    public static boolean isRooted() {
+        return findBinary("su");
+    }
+
+    public static boolean findBinary(String binaryName) {
+        boolean found = false;
+        if (!found) {
+            String[] places = {"/sbin/", "/system/bin/", "/system/xbin/", "/data/local/xbin/", "/data/local/bin/", "/system/sd/xbin/", "/system/bin/failsafe/", "/data/local/"};
+            for (String where : places) {
+                if (new File(where + binaryName).exists()) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+        return found;
+    }
 }

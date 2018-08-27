@@ -25,9 +25,13 @@ android {
         versionCode 1
         versionName "1.2.4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        buildConfigField "String", "REMOTE_LOGGER_URL", getRemoteLoggerURL()
+        buildConfigField "String", "BASE_URL", getBaseUrl()
     }
     buildTypes {
+        // Only used internally by DJI
+        internal {
+            initWith buildTypes.debug
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -51,17 +55,20 @@ dependencies {
     // explicitly depend on RxJava's latest version for bug fixes and new features.
     compile 'io.reactivex.rxjava2:rxjava:2.1.3'
     compile 'com.android.support:support-annotations:25.0.1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
+    internalCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
-    debugCompile  'com.github.markzhai:blockcanary-android:1.5.0'
+    debugCompile 'com.github.markzhai:blockcanary-android:1.5.0'
+    internalCompile 'com.github.markzhai:blockcanary-android:1.5.0'
     releaseCompile 'com.github.markzhai:blockcanary-no-op:1.5.0'
 }
 
 /**
- *
+ * e.g, ./gradlew -PbaseUrl=yoururl.com assembleDebug
  * @return return the entered value if there is any, if not empty string
  */
-def getRemoteLoggerURL() {
-    def value = project.getProperties().get("remoteLoggerURL")
+def getBaseUrl() {
+    def value = project.getProperties().get("baseUrl")
     return value != null ? "\"" + value + "\"" : "\"\""
 }
