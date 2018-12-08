@@ -16,6 +16,7 @@ import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
@@ -28,6 +29,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.dji.wsbridge.lib.BridgeApplication;
 import com.dji.wsbridge.lib.BridgeUpdateService;
 import com.dji.wsbridge.lib.DJILogger;
@@ -314,8 +316,22 @@ public class BridgeActivity extends Activity {
                 isStreamRunnerActive.set(true);
                 deviceToWSRunner = new StreamRunner(wsInputStream, usbOutputStream, "Bridge to USB");
                 wsToDeviceRunner = new StreamRunner(usbInputStream, wsOutputStream, "USB to Bridge");
-                deviceToWSRunner.start();
-                wsToDeviceRunner.start();
+                try {
+                    Crashlytics.log("Device to WS Runner alive "+ deviceToWSRunner.isAlive());
+                    Crashlytics.log("WS to Device Runner alive "+ wsToDeviceRunner.isAlive());
+                    deviceToWSRunner.start();
+                    wsToDeviceRunner.start();
+                } catch (IllegalThreadStateException exception){
+                    Crashlytics.logException(exception);
+                    stopStreamTransfer();
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            refresh();
+                        }
+                    },1500);
+                }
+
             } else {
                 Log.d(TAG, "Stream Transfers NOT started");
                 DJILogger.e(TAG, "Stream Transfers NOT started");
@@ -372,18 +388,18 @@ public class BridgeActivity extends Activity {
     }
 
     private void stopStreamTransfer() {
-        if (wsToDeviceRunner != null && deviceToWSRunner != null) {
-            isStreamRunnerActive.set(false);
-
+        if (wsToDeviceRunner != null) {
             wsToDeviceRunner.cleanup();
             wsToDeviceRunner = null;
-
+        }
+        if (deviceToWSRunner != null) {
             deviceToWSRunner.cleanup();
             deviceToWSRunner = null;
-
-            USBConnectionManager.getInstance().closeStreams();
-            WSConnectionManager.getInstance().closeStreams();
         }
+        isStreamRunnerActive.set(false);
+
+        USBConnectionManager.getInstance().closeStreams();
+        WSConnectionManager.getInstance().closeStreams();
     }
     //endregion -----------------------------------------------------------------------------------------------------
 
