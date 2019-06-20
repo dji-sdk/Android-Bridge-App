@@ -60,7 +60,7 @@
 
         <meta-data
             android:name="io.fabric.ApiKey"
-            android:value="yourFabricsKeyGoesHere" />
+            android:value="yourFabricKeyGoesHere" />
 
         <activity
             android:name=".SettingsActivity"
