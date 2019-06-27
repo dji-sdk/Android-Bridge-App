@@ -58,9 +58,6 @@
                 android:resource="@xml/accessory_filter" />
         </activity>
 
-        <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="yourFabricKeyGoesHere" />
 
         <activity
             android:name=".SettingsActivity"
