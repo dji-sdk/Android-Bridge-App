@@ -18,27 +18,27 @@
         android:text="@string/dummy_content"
         android:textColor="#33b5e5"
         android:textSize="50sp"
-        android:textStyle="bold"/>
+        android:textStyle="bold" />
 
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true"
-        android:background="#242d34">
+        android:background="#242d34"
+        android:fitsSystemWindows="true">
 
         <TextView
+            android:id="@+id/iptextView"
             android:layout_width="195dp"
             android:layout_height="61dp"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textStyle="bold"
-            android:text="@string/default_ip_address"
-            android:id="@+id/iptextView"
             android:layout_gravity="center"
-            android:gravity="center"
             android:background="@drawable/icon_rect"
-            android:textColor="#fff"/>
+            android:gravity="center"
+            android:text="@string/default_ip_address"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="#fff"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:id="@+id/fullscreen_content_controls"
@@ -53,65 +53,85 @@
         </LinearLayout>
 
         <RelativeLayout
-            style="?metaButtonBarStyle"
-            tools:ignore="UselessParent"
             android:id="@+id/relativeLayout"
+            style="?metaButtonBarStyle"
             android:layout_width="match_parent"
             android:layout_height="76dp"
             android:layout_gravity="center_horizontal|top"
             android:background="@drawable/icon_navgation_bar_2x"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            tools:ignore="UselessParent">
 
 
             <ImageView
+                android:id="@+id/imageViewRC"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/imageViewRC"
-                android:tint="@android:color/holo_red_light"
-                android:tintMode="add"
-                android:adjustViewBounds="false"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
                 android:layout_gravity="start"
+                android:layout_marginLeft="15dp"
+                android:layout_marginStart="15dp"
+                android:adjustViewBounds="false"
                 android:scaleType="fitCenter"
                 android:src="@drawable/icon_rc"
-                android:layout_marginStart="15dp"
-                android:layout_centerVertical="true"
-                android:layout_alignParentStart="true"
-                android:layout_marginLeft="15dp"
-                android:layout_alignParentLeft="true"/>
+                android:tint="@android:color/holo_red_light"
+                android:tintMode="add" />
 
             <ImageView
+                android:id="@+id/imageViewWifi"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/imageViewWifi"
-                android:adjustViewBounds="true"
-                android:layout_gravity="end"
-                android:scaleType="fitCenter"
-                android:src="@drawable/icon_wifi"
                 android:layout_alignBottom="@+id/imageViewRC"
                 android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_gravity="end"
                 android:layout_marginEnd="15dp"
                 android:layout_marginRight="15dp"
-                android:layout_alignParentRight="true"/>
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                android:src="@drawable/icon_wifi" />
 
             <ImageView
+                android:id="@+id/imageView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/imageView"
-                android:background="@drawable/icon_dji"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="8dp"/>
+                android:layout_marginTop="8dp"
+                android:background="@drawable/icon_dji" />
 
         </RelativeLayout>
 
         <TextView
             android:id="@+id/versionText"
-            android:layout_gravity="bottom|center_horizontal"
-            android:textColor="@android:color/white"
-            android:padding="50dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="1.0"/>
+            android:layout_gravity="bottom|center_horizontal"
+            android:padding="50dp"
+            android:textColor="@android:color/white"
+            tools:text="1.0" />
+
+        <ImageButton
+            android:id="@+id/btnSettings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_margin="20dp"
+            android:background="@android:color/transparent"
+            android:src="@android:drawable/ic_menu_preferences"
+            android:visibility="gone" />
+
+        <ImageButton
+            android:id="@+id/btnInstallUpdate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|right"
+            android:layout_margin="20dp"
+            android:background="@android:color/transparent"
+            android:src="@android:drawable/ic_dialog_alert"
+            android:visibility="gone" />
     </FrameLayout>
 
 </FrameLayout>

@@ -38,6 +38,7 @@ captures/
 
 # IntelliJ
 *.iml
+.idea/
 .idea/*.xml
 .idea/dictionaries
 .idea/libraries
@@ -65,3 +66,7 @@ Thumbs.db
 
 # OSX files
 .DS_Store
+
+.gradle/
+.gradle/buildOutputCleanup
+build/
