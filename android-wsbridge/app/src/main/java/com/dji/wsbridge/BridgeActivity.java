@@ -29,7 +29,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
 import com.dji.wsbridge.lib.BridgeApplication;
 import com.dji.wsbridge.lib.BridgeUpdateService;
 import com.dji.wsbridge.lib.DJILogger;
@@ -37,6 +36,7 @@ import com.dji.wsbridge.lib.StreamRunner;
 import com.dji.wsbridge.lib.Utils;
 import com.dji.wsbridge.lib.connection.USBConnectionManager;
 import com.dji.wsbridge.lib.connection.WSConnectionManager;
+
 import com.squareup.otto.Subscribe;
 
 import java.io.InputStream;
@@ -49,6 +49,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
+
+import static com.dji.wsbridge.lib.BridgeApplication.isInternalVersion;
+import static com.dji.wsbridge.lib.BridgeApplication.logToFirebase;
+import static com.dji.wsbridge.lib.BridgeApplication.recordExceptionToFirebase;
 
 
 public class BridgeActivity extends Activity {
@@ -317,12 +321,12 @@ public class BridgeActivity extends Activity {
                 deviceToWSRunner = new StreamRunner(wsInputStream, usbOutputStream, "Bridge to USB");
                 wsToDeviceRunner = new StreamRunner(usbInputStream, wsOutputStream, "USB to Bridge");
                 try {
-                    Crashlytics.log("Device to WS Runner alive "+ deviceToWSRunner.isAlive());
-                    Crashlytics.log("WS to Device Runner alive "+ wsToDeviceRunner.isAlive());
+                    logToFirebase("Device to WS Runner alive " + deviceToWSRunner.isAlive());
+                    logToFirebase("WS to Device Runner alive " + wsToDeviceRunner.isAlive());
                     deviceToWSRunner.start();
                     wsToDeviceRunner.start();
                 } catch (IllegalThreadStateException exception){
-                    Crashlytics.logException(exception);
+                    recordExceptionToFirebase(exception);
                     stopStreamTransfer();
                     new Handler().postDelayed(new Runnable() {
                         @Override
@@ -429,9 +433,7 @@ public class BridgeActivity extends Activity {
         try {
             WSConnectionManager.setupInstance(WEB_SOCKET_PORT);
         } catch (UnknownHostException e) {
-            //Crashlytics.logException(e);
-            //e.printStackTrace();
-            //Log.e(TAG,e.getMessage());
+            recordExceptionToFirebase(e);
         }
     }
 
@@ -498,10 +500,6 @@ public class BridgeActivity extends Activity {
         }
         Log.i("isMyServiceRunning?", false + "");
         return false;
-    }
-
-    private boolean isInternalVersion() {
-        return BuildConfig.BUILD_TYPE == "internal";
     }
 
     //endregion

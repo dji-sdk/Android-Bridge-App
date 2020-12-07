@@ -5,12 +5,11 @@ import android.app.Application;
 import android.os.Bundle;
 import android.os.StrictMode;
 
-import com.crashlytics.android.Crashlytics;
 import com.dji.wsbridge.BuildConfig;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.squareup.otto.Bus;
 import com.squareup.otto.ThreadEnforcer;
-
-import io.fabric.sdk.android.Fabric;
 
 public class BridgeApplication extends Application implements Application.ActivityLifecycleCallbacks {
 
@@ -25,19 +24,13 @@ public class BridgeApplication extends Application implements Application.Activi
     @Override
     public void onCreate() {
         super.onCreate();
-        if (BuildConfig.BUILD_TYPE != "debug") {
-            Fabric.with(this, new Crashlytics());
+        if(isInternalVersion()) {
+            FirebaseApp.initializeApp(getApplicationContext());
         }
         DJILogger.init();
         instance = this;
-        //registerActivityLifecycleCallbacks(this);
+        registerActivityLifecycleCallbacks(this);
         if (BuildConfig.DEBUG) {
-            // Detect UI-Thread blockage
-            //BlockCanary.install(this, new AppBlockCanaryContext()).start();
-            //// Detect memory leakage
-            //if (!LeakCanary.isInAnalyzerProcess(this)) {
-            //    LeakCanary.install(this);
-            //}
             // Detect thread violation
             StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyDropBox().penaltyLog().build());
             StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().detectAll()
@@ -50,6 +43,23 @@ public class BridgeApplication extends Application implements Application.Activi
     public Bus getBus() {
         return this.eventBus;
     }
+
+    public static boolean isInternalVersion() {
+        return BuildConfig.BUILD_TYPE == "internal";
+    }
+
+    public static void logToFirebase(String message){
+        if(isInternalVersion() && FirebaseCrashlytics.getInstance()!=null){
+            FirebaseCrashlytics.getInstance().log(message);
+        }
+    }
+
+    public static void recordExceptionToFirebase(Exception exception){
+        if(isInternalVersion() && FirebaseCrashlytics.getInstance()!=null){
+            FirebaseCrashlytics.getInstance().recordException(exception);
+        }
+    }
+
 
     //region -------------------------------------- Activity Callbacks and Helpers ---------------------------------------------
     @Override
