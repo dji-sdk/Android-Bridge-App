@@ -36,7 +36,6 @@ import com.dji.wsbridge.lib.StreamRunner;
 import com.dji.wsbridge.lib.Utils;
 import com.dji.wsbridge.lib.connection.USBConnectionManager;
 import com.dji.wsbridge.lib.connection.WSConnectionManager;
-
 import com.squareup.otto.Subscribe;
 
 import java.io.InputStream;
@@ -50,9 +49,9 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 
-import static com.dji.wsbridge.lib.BridgeApplication.isInternalVersion;
 import static com.dji.wsbridge.lib.BridgeApplication.logToFirebase;
 import static com.dji.wsbridge.lib.BridgeApplication.recordExceptionToFirebase;
+import static com.dji.wsbridge.lib.Utils.isInternalVersion;
 
 
 public class BridgeActivity extends Activity {
@@ -61,19 +60,19 @@ public class BridgeActivity extends Activity {
     private static final int WEB_SOCKET_PORT = 9007;
     private static final Observable HEART_BEAT = Observable.timer(2, TimeUnit.SECONDS).repeat().observeOn(AndroidSchedulers.mainThread());
     public static AtomicBoolean isStarted = new AtomicBoolean(false);
-    private Intent bridgeServiceIntent;
     BroadcastReceiver updateAvailableReceiver;
     IntentFilter updateAvailableFilter;
     SharedPreferences sharedPreferences;
     Context ctx;
+    private Intent bridgeServiceIntent;
     private TextView mIPTextView;
     private ImageView mRCIconView;
     private ImageView mWifiIconView;
-    private AtomicBoolean isUSBConnected = new AtomicBoolean(false);
-    private AtomicBoolean isRCConnected = new AtomicBoolean(false);
-    private AtomicBoolean isWiFiConnected = new AtomicBoolean(false);
-    private AtomicBoolean isWSTrafficSlow = new AtomicBoolean(false);
-    private AtomicBoolean isStreamRunnerActive = new AtomicBoolean(false);
+    private final AtomicBoolean isUSBConnected = new AtomicBoolean(false);
+    private final AtomicBoolean isRCConnected = new AtomicBoolean(false);
+    private final AtomicBoolean isWiFiConnected = new AtomicBoolean(false);
+    private final AtomicBoolean isWSTrafficSlow = new AtomicBoolean(false);
+    private final AtomicBoolean isStreamRunnerActive = new AtomicBoolean(false);
     private InputStream usbInputStream;
     private OutputStream usbOutputStream;
     private InputStream wsInputStream;
@@ -325,7 +324,7 @@ public class BridgeActivity extends Activity {
                     logToFirebase("WS to Device Runner alive " + wsToDeviceRunner.isAlive());
                     deviceToWSRunner.start();
                     wsToDeviceRunner.start();
-                } catch (IllegalThreadStateException exception){
+                } catch (IllegalThreadStateException exception) {
                     recordExceptionToFirebase(exception);
                     stopStreamTransfer();
                     new Handler().postDelayed(new Runnable() {
@@ -333,7 +332,7 @@ public class BridgeActivity extends Activity {
                         public void run() {
                             refresh();
                         }
-                    },1500);
+                    }, 1500);
                 }
 
             } else {

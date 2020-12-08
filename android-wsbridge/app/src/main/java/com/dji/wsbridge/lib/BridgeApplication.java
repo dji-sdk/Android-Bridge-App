@@ -11,6 +11,8 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.squareup.otto.Bus;
 import com.squareup.otto.ThreadEnforcer;
 
+import static com.dji.wsbridge.lib.Utils.isInternalVersion;
+
 public class BridgeApplication extends Application implements Application.ActivityLifecycleCallbacks {
 
     public static final String TAG = "APPLICATION";
@@ -21,10 +23,22 @@ public class BridgeApplication extends Application implements Application.Activi
         return instance;
     }
 
+    public static void logToFirebase(String message) {
+        if (isInternalVersion() && FirebaseCrashlytics.getInstance() != null) {
+            FirebaseCrashlytics.getInstance().log(message);
+        }
+    }
+
+    public static void recordExceptionToFirebase(Exception exception) {
+        if (isInternalVersion() && FirebaseCrashlytics.getInstance() != null) {
+            FirebaseCrashlytics.getInstance().recordException(exception);
+        }
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
-        if(isInternalVersion()) {
+        if (isInternalVersion()) {
             FirebaseApp.initializeApp(getApplicationContext());
         }
         DJILogger.init();
@@ -43,23 +57,6 @@ public class BridgeApplication extends Application implements Application.Activi
     public Bus getBus() {
         return this.eventBus;
     }
-
-    public static boolean isInternalVersion() {
-        return BuildConfig.BUILD_TYPE == "internal";
-    }
-
-    public static void logToFirebase(String message){
-        if(isInternalVersion() && FirebaseCrashlytics.getInstance()!=null){
-            FirebaseCrashlytics.getInstance().log(message);
-        }
-    }
-
-    public static void recordExceptionToFirebase(Exception exception){
-        if(isInternalVersion() && FirebaseCrashlytics.getInstance()!=null){
-            FirebaseCrashlytics.getInstance().recordException(exception);
-        }
-    }
-
 
     //region -------------------------------------- Activity Callbacks and Helpers ---------------------------------------------
     @Override
