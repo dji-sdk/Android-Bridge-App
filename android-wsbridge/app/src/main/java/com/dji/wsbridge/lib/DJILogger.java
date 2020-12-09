@@ -24,7 +24,7 @@ import java.util.List;
 
 import okhttp3.Response;
 
-import static com.dji.wsbridge.lib.BridgeApplication.recordExceptionToFirebase;
+import static com.dji.wsbridge.lib.Utils.recordExceptionToFirebase;
 
 public class DJILogger extends Thread {
 

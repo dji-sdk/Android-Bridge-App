@@ -7,7 +7,6 @@ import android.os.StrictMode;
 
 import com.dji.wsbridge.BuildConfig;
 import com.google.firebase.FirebaseApp;
-import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.squareup.otto.Bus;
 import com.squareup.otto.ThreadEnforcer;
 
@@ -21,18 +20,6 @@ public class BridgeApplication extends Application implements Application.Activi
 
     public static BridgeApplication getInstance() {
         return instance;
-    }
-
-    public static void logToFirebase(String message) {
-        if (isInternalVersion() && FirebaseCrashlytics.getInstance() != null) {
-            FirebaseCrashlytics.getInstance().log(message);
-        }
-    }
-
-    public static void recordExceptionToFirebase(Exception exception) {
-        if (isInternalVersion() && FirebaseCrashlytics.getInstance() != null) {
-            FirebaseCrashlytics.getInstance().recordException(exception);
-        }
     }
 
     @Override

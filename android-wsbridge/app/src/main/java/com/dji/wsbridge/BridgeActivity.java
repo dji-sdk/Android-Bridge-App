@@ -49,9 +49,9 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 
-import static com.dji.wsbridge.lib.BridgeApplication.logToFirebase;
-import static com.dji.wsbridge.lib.BridgeApplication.recordExceptionToFirebase;
 import static com.dji.wsbridge.lib.Utils.isInternalVersion;
+import static com.dji.wsbridge.lib.Utils.logToFirebase;
+import static com.dji.wsbridge.lib.Utils.recordExceptionToFirebase;
 
 
 public class BridgeActivity extends Activity {

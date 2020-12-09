@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.dji.wsbridge.lib.BridgeApplication.recordExceptionToFirebase;
+import static com.dji.wsbridge.lib.Utils.recordExceptionToFirebase;
 
 public class StreamRunner extends Thread {
 
