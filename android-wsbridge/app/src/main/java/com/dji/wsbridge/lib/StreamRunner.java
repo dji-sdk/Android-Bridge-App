@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.dji.wsbridge.lib.Utils.recordExceptionToFirebase;
+
 public class StreamRunner extends Thread {
 
     private static final String TAG = StreamRunner.class.getSimpleName();
@@ -45,7 +47,7 @@ public class StreamRunner extends Thread {
                     }
                 }
             } catch (Exception e) {
-                //Crashlytics.logException(e);
+                recordExceptionToFirebase(e);
                 //e.printStackTrace();
                 //Log.e(TAG, e.getMessage());
             }

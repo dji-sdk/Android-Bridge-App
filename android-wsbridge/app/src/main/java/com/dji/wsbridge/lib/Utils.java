@@ -1,5 +1,8 @@
 package com.dji.wsbridge.lib;
 
+import com.dji.wsbridge.BuildConfig;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -180,5 +183,21 @@ public class Utils {
             }
         }
         return found;
+    }
+
+    public static boolean isInternalVersion() {
+        return BuildConfig.BUILD_TYPE == "internal";
+    }
+
+    public static void logToFirebase(String message) {
+        if (isInternalVersion() && FirebaseCrashlytics.getInstance() != null) {
+            FirebaseCrashlytics.getInstance().log(message);
+        }
+    }
+
+    public static void recordExceptionToFirebase(Exception exception) {
+        if (isInternalVersion() && FirebaseCrashlytics.getInstance() != null) {
+            FirebaseCrashlytics.getInstance().recordException(exception);
+        }
     }
 }

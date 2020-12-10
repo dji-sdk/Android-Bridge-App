@@ -15,8 +15,9 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
 import android.util.Log;
+
+import androidx.annotation.Nullable;
 
 import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.error.ANError;
@@ -94,10 +95,7 @@ public class BridgeUpdateService extends Service {
     public void initializeTimerTask() {
         timerTask = new TimerTask() {
             public void run() {
-                Log.i("Sid", "in timer ++++  " + (counter++));
                 myHandler.post(new checkVersionRunnable());
-
-
             }
         };
     }

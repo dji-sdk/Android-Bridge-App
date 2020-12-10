@@ -1,14 +1,14 @@
 package com.dji.wsbridge.lib;
 
-import android.support.annotation.IntDef;
-import android.support.annotation.StringDef;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.annotation.IntDef;
+import androidx.annotation.StringDef;
 
 import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.error.ANError;
 import com.androidnetworking.interfaces.OkHttpResponseListener;
-import com.crashlytics.android.Crashlytics;
 import com.dji.wsbridge.BuildConfig;
 
 import org.json.JSONException;
@@ -23,6 +23,8 @@ import java.util.Collections;
 import java.util.List;
 
 import okhttp3.Response;
+
+import static com.dji.wsbridge.lib.Utils.recordExceptionToFirebase;
 
 public class DJILogger extends Thread {
 
@@ -167,8 +169,7 @@ public class DJILogger extends Thread {
             object.put("message", message);
             object.put("time_stamp", System.currentTimeMillis());
         } catch (JSONException e) {
-            Crashlytics.logException(e);
-
+            recordExceptionToFirebase(e);
             e.printStackTrace();
         }
         messageQueue.add(object);

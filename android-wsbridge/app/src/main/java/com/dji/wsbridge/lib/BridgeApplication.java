@@ -5,12 +5,12 @@ import android.app.Application;
 import android.os.Bundle;
 import android.os.StrictMode;
 
-import com.crashlytics.android.Crashlytics;
 import com.dji.wsbridge.BuildConfig;
+import com.google.firebase.FirebaseApp;
 import com.squareup.otto.Bus;
 import com.squareup.otto.ThreadEnforcer;
 
-import io.fabric.sdk.android.Fabric;
+import static com.dji.wsbridge.lib.Utils.isInternalVersion;
 
 public class BridgeApplication extends Application implements Application.ActivityLifecycleCallbacks {
 
@@ -25,19 +25,13 @@ public class BridgeApplication extends Application implements Application.Activi
     @Override
     public void onCreate() {
         super.onCreate();
-        if (BuildConfig.BUILD_TYPE != "debug") {
-            Fabric.with(this, new Crashlytics());
+        if (isInternalVersion()) {
+            FirebaseApp.initializeApp(getApplicationContext());
         }
         DJILogger.init();
         instance = this;
-        //registerActivityLifecycleCallbacks(this);
+        registerActivityLifecycleCallbacks(this);
         if (BuildConfig.DEBUG) {
-            // Detect UI-Thread blockage
-            //BlockCanary.install(this, new AppBlockCanaryContext()).start();
-            //// Detect memory leakage
-            //if (!LeakCanary.isInAnalyzerProcess(this)) {
-            //    LeakCanary.install(this);
-            //}
             // Detect thread violation
             StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyDropBox().penaltyLog().build());
             StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().detectAll()

@@ -29,6 +29,8 @@ import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.dji.wsbridge.lib.BridgeApplication.recordExceptionToFirebase;
+
 public class WSConnectionManager extends WebSocketServer implements ConnectionManager {
 
     private static final String TAG = "NW";
@@ -108,7 +110,7 @@ public class WSConnectionManager extends WebSocketServer implements ConnectionMa
             }
             streamFilter = (receivedData.getInt("Filter") == 1) ? StreamFilter.FILTER_VIDEO : StreamFilter.FILTER_NONE;
         } catch (Exception e) {
-            //Crashlytics.logException(e);
+            recordExceptionToFirebase(e);
             //e.printStackTrace();
             //Log.e(TAG, e.getMessage());
         }
@@ -122,7 +124,7 @@ public class WSConnectionManager extends WebSocketServer implements ConnectionMa
             ((FramedataImpl1) framedata).setPayload(ByteBuffer.wrap(sentJSON.toString()
                     .getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
-            //Crashlytics.logException(e);
+            recordExceptionToFirebase(e);
             //e.printStackTrace();
             //Log.e(TAG,e.getMessage());
         }
@@ -210,7 +212,7 @@ public class WSConnectionManager extends WebSocketServer implements ConnectionMa
                 mInStream = null;
             }
         } catch (IOException e) {
-            //Crashlytics.logException(e);
+            recordExceptionToFirebase(e);
             //e.printStackTrace();
             //Log.e(TAG,e.getMessage());
         }
@@ -241,7 +243,7 @@ public class WSConnectionManager extends WebSocketServer implements ConnectionMa
             try {
                 mLast = mQueue.take();
             } catch (InterruptedException e) {
-                //Crashlytics.logException(e);
+                recordExceptionToFirebase(e);
                 //Log.e(TAG,e.getMessage());
                 //e.printStackTrace();
             }
