@@ -50,8 +50,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 
 import static com.dji.wsbridge.lib.Utils.isInternalVersion;
-import static com.dji.wsbridge.lib.Utils.logToFirebase;
-import static com.dji.wsbridge.lib.Utils.recordExceptionToFirebase;
+//import static com.dji.wsbridge.lib.Utils.logToFirebase;
+//import static com.dji.wsbridge.lib.Utils.recordExceptionToFirebase;
 
 
 public class BridgeActivity extends Activity {
@@ -320,12 +320,12 @@ public class BridgeActivity extends Activity {
                 deviceToWSRunner = new StreamRunner(wsInputStream, usbOutputStream, "Bridge to USB");
                 wsToDeviceRunner = new StreamRunner(usbInputStream, wsOutputStream, "USB to Bridge");
                 try {
-                    logToFirebase("Device to WS Runner alive " + deviceToWSRunner.isAlive());
-                    logToFirebase("WS to Device Runner alive " + wsToDeviceRunner.isAlive());
+                    //import static com.dji.wsbridge.lib.Utils.recordExceptionToFirebase;Firebase("Device to WS Runner alive " + deviceToWSRunner.isAlive());
+                    //logToFirebase("WS to Device Runner alive " + wsToDeviceRunner.isAlive());
                     deviceToWSRunner.start();
                     wsToDeviceRunner.start();
                 } catch (IllegalThreadStateException exception) {
-                    recordExceptionToFirebase(exception);
+                    //recordExceptionToFirebase(exception);
                     stopStreamTransfer();
                     new Handler().postDelayed(new Runnable() {
                         @Override
@@ -432,7 +432,7 @@ public class BridgeActivity extends Activity {
         try {
             WSConnectionManager.setupInstance(WEB_SOCKET_PORT);
         } catch (UnknownHostException e) {
-            recordExceptionToFirebase(e);
+            //recordExceptionToFirebase(e);
         }
     }
 
