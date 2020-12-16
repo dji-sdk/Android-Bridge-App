@@ -200,4 +200,45 @@ public class Utils {
 //            FirebaseCrashlytics.getInstance().recordException(exception);
 //        }
 //    }
+
+    public static byte getByte(int data) {
+        return (byte) (data & 0xff);
+    }
+
+    public static int getInt(byte[] bytes, final int offset, int length) {
+        if (null == bytes) {
+            return 0;
+        }
+        final int bytesLen = bytes.length;
+        if (bytesLen == 0 || offset < 0 || bytesLen <= offset) {
+            return 0;
+        }
+        if (length > bytesLen - offset) {
+            length = bytesLen - offset;
+        }
+
+        int value = 0;
+        for (int i = length + offset - 1; i >= offset; i--) {
+            value = (value << 8 | (bytes[i] & 0xff));
+        }
+        return value;
+    }
+
+    public static byte[] readBytes(byte[] source, int from, int length) {
+        byte[] result = new byte[length];
+        System.arraycopy(source, from, result, 0, length);
+        /**
+         for (int i = 0; i < length; i++) {
+         result[i] = source[from + i];
+         }
+         */
+        return result;
+    }
+
+    public static byte[] getBytes(short data) {
+        byte[] bytes = new byte[2];
+        bytes[0] = (byte) (data & 0xff);
+        bytes[1] = (byte) ((data & 0xff00) >> 8);
+        return bytes;
+    }
 }

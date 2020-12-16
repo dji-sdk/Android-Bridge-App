@@ -46,6 +46,57 @@ public class USBConnectionManager implements ConnectionManager {
 
     private InputStream mInStream;
     private OutputStream mOutStream;
+
+    private UsbModel currentModel = UsbModel.UNKNOWN;
+
+    public enum UsbModel {
+        /**
+         * 231之前的整机
+         */
+        AG("AG410"),
+
+        WM160("WM160"),
+
+        /**
+         * 新增的逻辑链路
+         */
+        LOGIC_LINK("com.dji.logiclink"),
+
+        UNKNOWN("Unknown");
+
+        private String value;
+
+        UsbModel(String value) {
+            this.value = value;
+        }
+
+        public static UsbModel find(String modelName) {
+            UsbModel result = UNKNOWN;
+            if (TextUtils.isEmpty(modelName)) {
+                return result;
+            }
+
+            for (int i = 0; i < values().length; i++) {
+                if (values()[i].value.equals(modelName)) {
+                    result = values()[i];
+                    break;
+                }
+            }
+            return result;
+        }
+
+        /**
+         * Retrieves the display name of an enum constant.
+         *
+         * @return string The display name of an enum
+         */
+        public String getModel() {
+            return this.value;
+        }
+
+    }
+
+
     private BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -111,9 +162,11 @@ public class USBConnectionManager implements ConnectionManager {
             && accessoryList.length > 0
             && !TextUtils.isEmpty(accessoryList[0].getManufacturer())
             && accessoryList[0].getManufacturer().equals("DJI")) {
+            mAccessory = accessoryList[0];
+            String model = mAccessory.getModel();
+            currentModel = UsbModel.find(model);
             BridgeApplication.getInstance().getBus().post(new RCConnectionEvent(true));
             //Check permission
-            mAccessory = accessoryList[0];
             if (mUsbManager.hasPermission(mAccessory)) {
                 Log.d(TAG, "RC CONNECTED");
             } else {
@@ -177,6 +230,10 @@ public class USBConnectionManager implements ConnectionManager {
             //recordExceptionToFirebase(e);
             e.printStackTrace();
         }
+    }
+
+    public UsbModel getUSBModel() {
+        return currentModel;
     }
 
     /**
