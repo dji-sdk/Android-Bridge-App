@@ -8,8 +8,9 @@ buildscript {
     }
 }
 apply plugin: 'com.android.application'
-apply plugin: 'com.google.gms.google-services'
-apply plugin: 'com.google.firebase.crashlytics'
+//TODO Add back firebase crashlytics for internal use
+//apply plugin: 'com.google.gms.google-services'
+//apply plugin: 'com.google.firebase.crashlytics'
 
 repositories {
 
@@ -63,8 +64,8 @@ dependencies {
     // Import the Firebase BoM (see: https://firebase.google.com/docs/android/learn-more#bom)
     implementation platform('com.google.firebase:firebase-bom:26.1.1')
 
-    // Firebase Crashlytics (Java)
-    implementation 'com.google.firebase:firebase-crashlytics'
+    // Firebase Crashlytics (Java) //TODO Add back Firebase for internal use
+    //implementation 'com.google.firebase:firebase-crashlytics'
 
 
 }

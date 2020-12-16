@@ -6,11 +6,11 @@ import android.os.Bundle;
 import android.os.StrictMode;
 
 import com.dji.wsbridge.BuildConfig;
-import com.google.firebase.FirebaseApp;
+//import com.google.firebase.FirebaseApp;
 import com.squareup.otto.Bus;
 import com.squareup.otto.ThreadEnforcer;
 
-import static com.dji.wsbridge.lib.Utils.isInternalVersion;
+
 
 public class BridgeApplication extends Application implements Application.ActivityLifecycleCallbacks {
 
@@ -25,9 +25,9 @@ public class BridgeApplication extends Application implements Application.Activi
     @Override
     public void onCreate() {
         super.onCreate();
-        if (isInternalVersion()) {
-            FirebaseApp.initializeApp(getApplicationContext());
-        }
+//        if (isInternalVersion()) {
+//            FirebaseApp.initializeApp(getApplicationContext());
+//        }
         DJILogger.init();
         instance = this;
         registerActivityLifecycleCallbacks(this);

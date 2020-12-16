@@ -29,7 +29,7 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-import static com.dji.wsbridge.lib.Utils.recordExceptionToFirebase;
+//import static com.dji.wsbridge.lib.Utils.recordExceptionToFirebase;
 
 public class USBConnectionManager implements ConnectionManager {
 
@@ -174,7 +174,7 @@ public class USBConnectionManager implements ConnectionManager {
                 mFileDescriptor = null;
             }
         } catch (IOException e) {
-            recordExceptionToFirebase(e);
+            //recordExceptionToFirebase(e);
             e.printStackTrace();
         }
     }

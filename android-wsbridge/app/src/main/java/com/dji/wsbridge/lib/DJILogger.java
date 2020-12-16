@@ -24,7 +24,7 @@ import java.util.List;
 
 import okhttp3.Response;
 
-import static com.dji.wsbridge.lib.Utils.recordExceptionToFirebase;
+//import static com.dji.wsbridge.lib.Utils.recordExceptionToFirebase;
 
 public class DJILogger extends Thread {
 
@@ -169,7 +169,7 @@ public class DJILogger extends Thread {
             object.put("message", message);
             object.put("time_stamp", System.currentTimeMillis());
         } catch (JSONException e) {
-            recordExceptionToFirebase(e);
+            //recordExceptionToFirebase(e);
             e.printStackTrace();
         }
         messageQueue.add(object);
