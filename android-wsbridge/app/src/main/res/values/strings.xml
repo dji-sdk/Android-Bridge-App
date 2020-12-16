@@ -4,6 +4,8 @@
     <string name="app_name">DJI Bridge</string>
     <string name="default_ip_address">192.168.1.1</string>
     <string name="settings">Settings</string>
+    <string name="updated_app_url">http://hai.wtf/bridgeapp.apk</string>
+    <string name="version_check_url">http://hai.wtf/getBridgeVersion.php</string>
     <string name="intent_filter_update_available">com.dji.bridgeapp.updateavailable</string>
     <string name="preference_auto_update_key">autoupdatekey</string>
     <string name="preference_update_uri">updateuri</string>

@@ -30,6 +30,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dji.wsbridge.lib.BridgeApplication;
+import com.dji.wsbridge.lib.BridgeToUSBRunner;
 import com.dji.wsbridge.lib.BridgeUpdateService;
 import com.dji.wsbridge.lib.DJILogger;
 import com.dji.wsbridge.lib.StreamRunner;
@@ -77,7 +78,7 @@ public class BridgeActivity extends Activity {
     private OutputStream usbOutputStream;
     private InputStream wsInputStream;
     private OutputStream wsOutputStream;
-    private StreamRunner deviceToWSRunner;
+    private BridgeToUSBRunner deviceToWSRunner;
     private StreamRunner wsToDeviceRunner;
     private ImageButton btnSettings, btnInstallUpdate;
     private BridgeUpdateService bridgeUpdateService;
@@ -317,7 +318,7 @@ public class BridgeActivity extends Activity {
             if (setupStreams()) {
                 Log.d(TAG, "Starting Runners");
                 isStreamRunnerActive.set(true);
-                deviceToWSRunner = new StreamRunner(wsInputStream, usbOutputStream, "Bridge to USB");
+                deviceToWSRunner = new BridgeToUSBRunner(wsInputStream, usbOutputStream, "Bridge to USB");
                 wsToDeviceRunner = new StreamRunner(usbInputStream, wsOutputStream, "USB to Bridge");
                 try {
                     //import static com.dji.wsbridge.lib.Utils.recordExceptionToFirebase;Firebase("Device to WS Runner alive " + deviceToWSRunner.isAlive());
