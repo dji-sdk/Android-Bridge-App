@@ -1,28 +1,13 @@
-buildscript {
-    repositories {
-
-    }
-
-    dependencies {
-
-    }
-}
 apply plugin: 'com.android.application'
 //TODO Add back firebase crashlytics for internal use
 //apply plugin: 'com.google.gms.google-services'
 //apply plugin: 'com.google.firebase.crashlytics'
 
-repositories {
-
-}
-
-
 android {
     compileSdkVersion 30
-    buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "com.dji.wsbridge"
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 30
         versionCode 1
         versionName "1.2.6"
@@ -46,7 +31,6 @@ android {
 }
 
 dependencies {
-
     implementation 'com.amitshekhar.android:android-networking:0.3.0'
     implementation 'org.java-websocket:java-websocket:1.3.3'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -66,8 +50,6 @@ dependencies {
 
     // Firebase Crashlytics (Java) //TODO Add back Firebase for internal use
     //implementation 'com.google.firebase:firebase-crashlytics'
-
-
 }
 
 /**
