@@ -11,7 +11,6 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
@@ -31,11 +30,12 @@
         android:theme="@style/AppTheme">
         <service
             android:name=".lib.BridgeUpdateService"
-            android:enabled="true"></service>
+            android:enabled="true" />
 
         <activity
             android:name=".BridgeActivity"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -62,7 +62,7 @@
         <activity
             android:name=".SettingsActivity"
             android:label="@string/settings"
-            android:theme="@android:style/Theme.Material.Dialog"></activity>
+            android:theme="@android:style/Theme.Material.Dialog" />
     </application>
 
 </manifest>
